@@ -23,7 +23,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { CategoryEditDialog } from './category-edit-dialog';
 import { Separator } from '../ui/separator';
 
@@ -125,7 +129,9 @@ const DraggableToken = ({ token }: { token: TemplateToken }) => {
           onDragStart={onDragStart}
           className="flex aspect-square items-center justify-center rounded-lg bg-background hover:bg-secondary cursor-grab active:cursor-grabbing transition-all text-muted-foreground hover:text-accent hover:drop-shadow-[0_0_5px_hsl(var(--accent))]"
         >
-          <IconComponent className="h-8 w-8" />
+          <div className="h-8 w-8">
+            <IconComponent />
+          </div>
         </div>
       </TooltipTrigger>
       <TooltipContent side="top">
