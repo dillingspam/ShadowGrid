@@ -40,24 +40,47 @@ export const MapGrid: FC<MapGridProps> = ({
 
   const onDragOver = (e: DragEvent) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+     if (e.dataTransfer.types.includes('application/json')) {
+      e.dataTransfer.dropEffect = 'copy';
+    } else {
+      e.dataTransfer.dropEffect = 'move';
+    }
   };
 
   const onDrop = (e: DragEvent) => {
     e.preventDefault();
-    if (isPlayerView) return;
-    if (!gridRef.current) return;
-    
-    const tokenId = e.dataTransfer.getData("application/reactflow");
-    const token = tokens.find((t) => t.id === tokenId);
-    if (!token) return;
+    if (isPlayerView || !gridRef.current) return;
 
     const gridBounds = gridRef.current.getBoundingClientRect();
     const x = e.clientX - gridBounds.left;
     const y = e.clientY - gridBounds.top;
-
     const newX = Math.floor(x / GRID_CELL_SIZE);
     const newY = Math.floor(y / GRID_CELL_SIZE);
+
+    // Check for new token drop
+    const newTokeDataString = e.dataTransfer.getData("application/json");
+    if (newTokeDataString) {
+      const { tokenType, icon, name } = JSON.parse(newTokeDataString);
+      const color = tokenType === 'player' ? 'hsl(var(--accent))' : tokenType === 'monster' ? 'hsl(var(--destructive))' : 'hsl(var(--primary))';
+      
+      const newToken: TokenData = {
+        id: `token-${Date.now()}-${Math.random()}`,
+        x: newX,
+        y: newY,
+        color,
+        icon,
+        size: 1,
+        name: `${name} ${tokens.filter(t => t.name.startsWith(name)).length + 1}`
+      };
+
+      setTokens(prev => [...prev, newToken]);
+      return;
+    }
+    
+    // Handle existing token move
+    const tokenId = e.dataTransfer.getData("application/reactflow");
+    const token = tokens.find((t) => t.id === tokenId);
+    if (!token) return;
 
     setTokens((prevTokens) =>
       prevTokens.map((t) =>
