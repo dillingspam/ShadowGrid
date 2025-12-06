@@ -38,9 +38,5 @@ export function FogOfWar({ fog, isPlayerView, fogOpacity }: FogOfWarProps) {
     );
   }, [fog, fogStyle]);
 
-  if (!fogCells.some(cell => cell !== null)) {
-    return null;
-  }
-
   return <div className="absolute inset-0 pointer-events-none z-[5]">{fogCells}</div>;
 }
