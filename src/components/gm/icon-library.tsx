@@ -8,31 +8,27 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
-  User,
-  Shield,
-  Swords,
-  Skull,
-  Gem,
-  Box,
-  Ghost,
-  Flame,
   Users,
   VenetianMask,
   ShoppingBag,
   Edit,
   Trash2,
+  MoreVertical,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { IconEditDialog } from './icon-edit-dialog';
 import { iconMap } from './token';
-import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 
 export interface TemplateToken {
   id: string;
@@ -70,7 +66,7 @@ const DraggableToken = ({ token }: { token: TemplateToken }) => {
     e.dataTransfer.effectAllowed = 'copy';
   };
 
-  const IconComponent = iconMap[token.iconName] || User;
+  const IconComponent = iconMap[token.iconName] || iconMap.default;
 
   return (
     <Tooltip>
@@ -107,46 +103,45 @@ const IconCategory = ({
 
   return (
     <>
-      <Dialog>
-        <DialogTrigger asChild>
+      <Collapsible>
+        <CollapsibleTrigger asChild>
           <Button variant="outline" className="w-full justify-start">
             {icon}
             <span className="ml-2">{title}</span>
           </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{title} Presets</DialogTitle>
-          </DialogHeader>
-          <ScrollArea className="max-h-[60vh] -mx-4 px-4">
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 py-4 pr-2">
-              {tokens.map((token) => (
-                <div key={token.id} className="flex flex-col items-center gap-2">
-                  <DraggableToken token={token} />
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => setEditingToken(token)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-destructive hover:text-destructive"
-                      onClick={() => onTokenDelete(token.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="py-2">
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 px-1">
+            {tokens.map((token) => (
+              <div key={token.id} className="relative group">
+                <DraggableToken token={token} />
+                <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => setEditingToken(token)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => onTokenDelete(token.id)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-              ))}
-            </div>
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
+              </div>
+            ))}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
 
       <IconEditDialog
         token={editingToken}
