@@ -23,11 +23,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CategoryEditDialog } from './category-edit-dialog';
 import { Separator } from '../ui/separator';
 
@@ -155,12 +151,9 @@ const IconCategory = ({
   onCategoryDelete: (categoryId: string) => void;
 }) => {
   const [editingToken, setEditingToken] = useState<TemplateToken | null>(null);
-  const [editingCategory, setEditingCategory] = useState<TokenCategory | null>(
-    null
-  );
-  const [isCreating, setIsCreating] = useState(false);
-
-  const handleCreate = (newTokenData: Omit<TemplateToken, 'id'>) => {
+  const [isCreatingToken, setIsCreatingToken] = useState(false);
+  
+  const handleCreateToken = (newTokenData: Omit<TemplateToken, 'id'>) => {
     onTokenAdd(category.id, newTokenData);
   };
 
@@ -191,7 +184,7 @@ const IconCategory = ({
                       <DropdownMenuContent>
                         <DropdownMenuItem
                           onClick={() => {
-                            setIsCreating(false);
+                            setIsCreatingToken(false);
                             setEditingToken(token);
                           }}
                         >
@@ -214,12 +207,12 @@ const IconCategory = ({
                 <TooltipTrigger asChild>
                   <button
                     onClick={() => {
-                      setIsCreating(true);
+                      setIsCreatingToken(true);
                       setEditingToken({
                         id: '',
                         name: 'New Preset',
                         iconName: 'HelpCircle',
-                        tokenType: 'item',
+                        tokenType: category.id === 'cat-player' ? 'player' : category.id === 'cat-monster' ? 'monster' : 'item',
                       });
                     }}
                     className="flex aspect-square items-center justify-center rounded-lg bg-transparent hover:bg-secondary cursor-pointer transition-all text-muted-foreground hover:text-primary"
@@ -248,8 +241,7 @@ const IconCategory = ({
           <DropdownMenuContent>
             <DropdownMenuItem
               onClick={() => {
-                setIsCreating(false);
-                setEditingCategory(category);
+                onCategoryUpdate(category);
               }}
             >
               <Edit className="mr-2 h-4 w-4" />
@@ -268,24 +260,14 @@ const IconCategory = ({
 
       <IconEditDialog
         token={editingToken}
-        isCreating={isCreating}
+        isCreating={isCreatingToken}
         onUpdate={(updatedToken) => {
           onTokenUpdate(category.id, updatedToken);
           setEditingToken(null);
         }}
-        onCreate={handleCreate}
+        onCreate={handleCreateToken}
         onClose={() => setEditingToken(null)}
       />
-
-      {editingCategory && (
-        <CategoryEditDialog
-          category={editingCategory}
-          isCreating={isCreating}
-          onUpdate={onCategoryUpdate}
-          onClose={() => setEditingCategory(null)}
-          onCreate={onTokenAdd}
-        />
-      )}
     </>
   );
 };
@@ -360,6 +342,8 @@ export function IconLibrary() {
     setCategories((prev) =>
       prev.map((c) => (c.id === updatedCategory.id ? updatedCategory : c))
     );
+    setEditingCategory(updatedCategory as Omit<TokenCategory, 'tokens'>);
+    setIsCreatingCategory(false);
   };
 
   const handleCategoryDelete = (categoryId: string) => {
@@ -384,7 +368,10 @@ export function IconLibrary() {
                 onTokenUpdate={handleTokenUpdate}
                 onTokenDelete={handleTokenDelete}
                 onTokenAdd={handleTokenAdd}
-                onCategoryUpdate={handleCategoryUpdate}
+                onCategoryUpdate={(cat) => {
+                  setEditingCategory(cat);
+                  setIsCreatingCategory(false);
+                }}
                 onCategoryDelete={handleCategoryDelete}
               />
             ))}
