@@ -24,11 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export interface TemplateToken {
   id: string;
@@ -38,7 +34,7 @@ export interface TemplateToken {
 }
 
 const initialPlayers: TemplateToken[] = [
-  { id: 'player-template-1', name: 'Player', tokenType: 'player', iconName: 'User' },
+  { id: 'player-template-1', name: 'Player', tokenType: 'player', iconName: 'Shield' },
   { id: 'player-template-2', name: 'Guardian', tokenType: 'player', iconName: 'Shield' },
 ];
 
@@ -103,15 +99,15 @@ const IconCategory = ({
 
   return (
     <>
-      <Collapsible>
-        <CollapsibleTrigger asChild>
+      <Popover>
+        <PopoverTrigger asChild>
           <Button variant="outline" className="w-full justify-start">
             {icon}
             <span className="ml-2">{title}</span>
           </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="py-2">
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 px-1">
+        </PopoverTrigger>
+        <PopoverContent className="w-80">
+          <div className="grid grid-cols-4 gap-4">
             {tokens.map((token) => (
               <div key={token.id} className="relative group">
                 <DraggableToken token={token} />
@@ -140,8 +136,8 @@ const IconCategory = ({
               </div>
             ))}
           </div>
-        </CollapsibleContent>
-      </Collapsible>
+        </PopoverContent>
+      </Popover>
 
       <IconEditDialog
         token={editingToken}
