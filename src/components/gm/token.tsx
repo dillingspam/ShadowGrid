@@ -69,11 +69,6 @@ export const Token: FC<TokenProps> = (props) => {
     border: `2px solid hsla(var(--primary-foreground), 0.5)`,
   };
   
-  const iconContainerStyle: React.CSSProperties = {
-    width: `${size > 1 ? 60 : 75}%`,
-    height: `${size > 1 ? 60 : 75}%`
-  }
-
   const isLargeToken = size > 1;
 
   return (
@@ -85,15 +80,13 @@ export const Token: FC<TokenProps> = (props) => {
             onDragStart={onDragStart}
             onContextMenu={handleContextMenu}
             className={cn(
-              "absolute flex items-center justify-center transition-all duration-100",
+              "absolute flex items-center justify-center transition-all duration-100 p-1",
               !isPlayerView && "cursor-grab active:cursor-grabbing hover:scale-105 hover:z-10",
               isLargeToken ? 'rounded-lg' : 'rounded-full'
             )}
             style={tokenStyle}
           >
-            <div style={iconContainerStyle} className="transition-transform">
-              <IconComponent />
-            </div>
+            <IconComponent className="w-[75%] h-[75%]" />
           </div>
         </TooltipTrigger>
         <TooltipContent>
