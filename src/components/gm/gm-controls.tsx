@@ -13,13 +13,17 @@ interface GmControlsProps {
   onFogOpacityChange: (value: number) => void;
   isFogBrushActive: boolean;
   onFogBrushToggle: (active: boolean) => void;
+  brushSize: number;
+  onBrushSizeChange: (value: number) => void;
 }
 
 export function GmControls({ 
   fogOpacity, 
   onFogOpacityChange,
   isFogBrushActive,
-  onFogBrushToggle
+  onFogBrushToggle,
+  brushSize,
+  onBrushSizeChange
 }: GmControlsProps) {
   return (
     <div className="p-4">
@@ -38,6 +42,17 @@ export function GmControls({
             <Brush className="mr-2 h-4 w-4" />
             {isFogBrushActive ? 'Fog Brush Active' : 'Activate Fog Brush'}
           </Button>
+          <div className="space-y-3">
+            <Label htmlFor="brush-size">Brush Size</Label>
+            <Slider 
+              id="brush-size" 
+              value={[brushSize]}
+              onValueChange={(value) => onBrushSizeChange(value[0])}
+              max={10} 
+              min={1}
+              step={1} 
+            />
+          </div>
           <div className="space-y-3">
             <Label htmlFor="fog-opacity">Fog of War Opacity</Label>
             <Slider 

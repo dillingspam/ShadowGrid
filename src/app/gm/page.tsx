@@ -9,13 +9,18 @@ import { Separator } from '@/components/ui/separator';
 export default function GMPage() {
   const [fogOpacity, setFogOpacity] = useState(80);
   const [isFogBrushActive, setIsFogBrushActive] = useState(false);
+  const [brushSize, setBrushSize] = useState(3);
   
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
       <Header title="GM Screen" />
       <div className="grid md:grid-cols-[1fr_350px] flex-1 overflow-hidden">
         <main className="p-4 overflow-auto flex items-center justify-center">
-          <MapGrid fogOpacity={fogOpacity} isFogBrushActive={isFogBrushActive} />
+          <MapGrid 
+            fogOpacity={fogOpacity} 
+            isFogBrushActive={isFogBrushActive} 
+            brushSize={brushSize}
+          />
         </main>
         <aside className="hidden md:flex flex-col bg-card border-l border-border">
           <IconLibrary />
@@ -26,6 +31,8 @@ export default function GMPage() {
               onFogOpacityChange={setFogOpacity}
               isFogBrushActive={isFogBrushActive}
               onFogBrushToggle={setIsFogBrushActive}
+              brushSize={brushSize}
+              onBrushSizeChange={setBrushSize}
             />
           </div>
         </aside>

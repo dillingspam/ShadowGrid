@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, DragEvent, MouseEvent, useMemo, FC } from 'react';
+import { useState, useRef, DragEvent, MouseEvent, FC } from 'react';
 import { Token, GRID_CELL_SIZE } from './token';
 import type { TokenData } from './token';
 import { cn } from '@/lib/utils';
@@ -21,9 +21,15 @@ interface MapGridProps {
   isPlayerView?: boolean;
   fogOpacity?: number;
   isFogBrushActive?: boolean;
+  brushSize?: number;
 }
 
-export const MapGrid: FC<MapGridProps> = ({ isPlayerView = false, fogOpacity = 80, isFogBrushActive = false }) => {
+export const MapGrid: FC<MapGridProps> = ({ 
+  isPlayerView = false, 
+  fogOpacity = 80, 
+  isFogBrushActive = false,
+  brushSize = 3 
+}) => {
   const [tokens, setTokens] = useState(initialTokens);
   const [fog, setFog] = useState(() => generateInitialFog(GRID_WIDTH, GRID_HEIGHT, isPlayerView));
   const gridRef = useRef<HTMLDivElement>(null);
@@ -61,20 +67,28 @@ export const MapGrid: FC<MapGridProps> = ({ isPlayerView = false, fogOpacity = 8
     if (isPlayerView || !gridRef.current || !fogInteractionState.current) return;
     
     const gridBounds = gridRef.current.getBoundingClientRect();
-    const x = Math.floor((e.clientX - gridBounds.left) / GRID_CELL_SIZE);
-    const y = Math.floor((e.clientY - gridBounds.top) / GRID_CELL_SIZE);
+    const centerX = Math.floor((e.clientX - gridBounds.left) / GRID_CELL_SIZE);
+    const centerY = Math.floor((e.clientY - gridBounds.top) / GRID_CELL_SIZE);
     
-    if (x < 0 || x >= GRID_WIDTH || y < 0 || y >= GRID_HEIGHT) return;
-
     const shouldReveal = fogInteractionState.current === 'revealing';
+    const radius = brushSize - 1;
 
     setFog(prevFog => {
-      const newFog = prevFog.map(row => [...row]);
-      if (newFog[y][x] !== !shouldReveal) {
-        newFog[y][x] = !shouldReveal;
-        return newFog;
-      }
-      return prevFog;
+      let hasChanged = false;
+      const newFog = prevFog.map((row, y) => 
+        row.map((isFogged, x) => {
+          const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+          if (distance <= radius) {
+            if (isFogged === shouldReveal) {
+              hasChanged = true;
+              return !shouldReveal;
+            }
+          }
+          return isFogged;
+        })
+      );
+      
+      return hasChanged ? newFog : prevFog;
     });
   };
 
@@ -102,7 +116,7 @@ export const MapGrid: FC<MapGridProps> = ({ isPlayerView = false, fogOpacity = 8
   };
   
   const onContextMenu = (e: MouseEvent<HTMLDivElement>) => {
-    if (!isPlayerView) {
+    if (!isPlayerView && isFogBrushActive) {
       e.preventDefault();
     }
   }
