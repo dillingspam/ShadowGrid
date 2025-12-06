@@ -151,8 +151,8 @@ export const MapGrid: FC<MapGridProps> = ({
         <Image 
           src={mapImage}
           alt="Game Map"
-          layout="fill"
-          objectFit="cover"
+          fill
+          style={{objectFit: "cover"}}
           className="absolute inset-0 z-0"
         />
       )}
