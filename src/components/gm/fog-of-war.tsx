@@ -17,7 +17,7 @@ export function FogOfWar({ fog, isPlayerView, fogOpacity }: FogOfWarProps) {
   const fogStyle: React.CSSProperties = isPlayerView 
     ? { backgroundColor: 'hsl(var(--background))' }
     : {
-        backgroundColor: `hsla(var(--background), ${fogOpacity / 100})`,
+        backgroundColor: `hsla(0, 0%, 13%, ${fogOpacity / 100})`,
         backdropFilter: 'blur(1px)',
       };
 
@@ -27,7 +27,7 @@ export function FogOfWar({ fog, isPlayerView, fogOpacity }: FogOfWarProps) {
         isFogged ? (
           <div
             key={`${x}-${y}`}
-            className="absolute"
+            className="absolute transition-opacity duration-300"
             style={{
               left: x * GRID_CELL_SIZE,
               top: y * GRID_CELL_SIZE,

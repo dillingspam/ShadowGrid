@@ -13,7 +13,7 @@ export default function GMPage() {
       <Header title="GM Screen" />
       <div className="grid md:grid-cols-[1fr_350px] flex-1 overflow-hidden">
         <main className="p-4 overflow-auto flex items-center justify-center">
-          <MapGrid />
+          <MapGrid fogOpacity={fogOpacity} />
         </main>
         <aside className="hidden md:flex flex-col bg-card border-l border-border">
           <IconLibrary />

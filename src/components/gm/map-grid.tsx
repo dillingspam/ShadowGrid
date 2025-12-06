@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useRef, DragEvent, MouseEvent, useMemo } from 'react';
-import type { FC } from 'react';
+import { useState, useRef, DragEvent, MouseEvent, useMemo, FC } from 'react';
 import { Token, GRID_CELL_SIZE } from './token';
 import type { TokenData } from './token';
 import { cn } from '@/lib/utils';
@@ -20,14 +19,14 @@ const GRID_HEIGHT = 25;
 
 interface MapGridProps {
   isPlayerView?: boolean;
+  fogOpacity?: number;
 }
 
-export const MapGrid: FC<MapGridProps> = ({ isPlayerView = false }) => {
+export const MapGrid: FC<MapGridProps> = ({ isPlayerView = false, fogOpacity = 80 }) => {
   const [tokens, setTokens] = useState(initialTokens);
-  const [fog, setFog] = useState(() => generateInitialFog(GRID_WIDTH, GRID_HEIGHT, !isPlayerView));
-  const [fogOpacity, setFogOpacity] = useState(80);
+  const [fog, setFog] = useState(() => generateInitialFog(GRID_WIDTH, GRID_HEIGHT, isPlayerView));
   const gridRef = useRef<HTMLDivElement>(null);
-  const isRevealingFog = useRef(false);
+  const fogInteractionState = useRef<'revealing' | 'hiding' | null>(null);
 
   const onDragOver = (e: DragEvent) => {
     e.preventDefault();
@@ -58,7 +57,7 @@ export const MapGrid: FC<MapGridProps> = ({ isPlayerView = false }) => {
   };
   
   const handleFogInteraction = (e: MouseEvent<HTMLDivElement>) => {
-    if (isPlayerView || !gridRef.current) return;
+    if (isPlayerView || !gridRef.current || !fogInteractionState.current) return;
     
     const gridBounds = gridRef.current.getBoundingClientRect();
     const x = Math.floor((e.clientX - gridBounds.left) / GRID_CELL_SIZE);
@@ -66,10 +65,12 @@ export const MapGrid: FC<MapGridProps> = ({ isPlayerView = false }) => {
     
     if (x < 0 || x >= GRID_WIDTH || y < 0 || y >= GRID_HEIGHT) return;
 
+    const shouldReveal = fogInteractionState.current === 'revealing';
+
     setFog(prevFog => {
       const newFog = prevFog.map(row => [...row]);
-      if (newFog[y][x]) {
-        newFog[y][x] = false;
+      if (newFog[y][x] !== !shouldReveal) {
+        newFog[y][x] = !shouldReveal;
         return newFog;
       }
       return prevFog;
@@ -77,23 +78,33 @@ export const MapGrid: FC<MapGridProps> = ({ isPlayerView = false }) => {
   };
 
   const onMouseDown = (e: MouseEvent<HTMLDivElement>) => {
-    if (isPlayerView || e.button !== 0) return;
-    isRevealingFog.current = true;
+    if (isPlayerView) return;
+    if (e.button === 0) { // Left-click
+      fogInteractionState.current = 'revealing';
+    } else if (e.button === 2) { // Right-click
+      fogInteractionState.current = 'hiding';
+    }
     handleFogInteraction(e);
   };
 
   const onMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    if (!isRevealingFog.current) return;
+    if (!fogInteractionState.current) return;
     handleFogInteraction(e);
   };
   
   const onMouseUp = () => {
-    isRevealingFog.current = false;
+    fogInteractionState.current = null;
   };
 
   const onMouseLeave = () => {
-    isRevealingFog.current = false;
+    fogInteractionState.current = null;
   };
+  
+  const onContextMenu = (e: MouseEvent<HTMLDivElement>) => {
+    if (!isPlayerView) {
+      e.preventDefault();
+    }
+  }
 
   return (
     <div 
@@ -104,6 +115,7 @@ export const MapGrid: FC<MapGridProps> = ({ isPlayerView = false }) => {
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
       onMouseLeave={onMouseLeave}
+      onContextMenu={onContextMenu}
       className={cn(
         "relative w-full h-full min-h-[500px] bg-card border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10",
         !isPlayerView && "cursor-crosshair"
