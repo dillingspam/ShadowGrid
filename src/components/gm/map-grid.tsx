@@ -65,11 +65,25 @@ export const MapGrid: FC<MapGridProps> = ({
     if (isPlayerView || !gridRef.current) return;
 
     const gridBounds = gridRef.current.getBoundingClientRect();
-    const x = e.clientX - gridBounds.left;
-    const y = e.clientY - gridBounds.top;
-    const newX = Math.floor(x / GRID_CELL_SIZE);
-    const newY = Math.floor(y / GRID_CELL_SIZE);
+    
+    // Check if we are moving an existing token
+    const tokenId = e.dataTransfer.getData("application/reactflow");
+    const token = tokens.find((t) => t.id === tokenId);
+    
+    let dropX = e.clientX - gridBounds.left;
+    let dropY = e.clientY - gridBounds.top;
 
+    if (token) {
+      // Offset by half the token size to center it on the cursor
+      const offset = (token.size * GRID_CELL_SIZE) / 2;
+      dropX -= offset;
+      dropY -= offset;
+    }
+
+    const newX = Math.floor(dropX / GRID_CELL_SIZE);
+    const newY = Math.floor(dropY / GRID_CELL_SIZE);
+    
+    // Handle drop for new tokens from library
     const newTokeDataString = e.dataTransfer.getData("application/json");
     if (newTokeDataString) {
       const { tokenType, icon, name } = JSON.parse(newTokeDataString);
@@ -89,8 +103,6 @@ export const MapGrid: FC<MapGridProps> = ({
       return;
     }
     
-    const tokenId = e.dataTransfer.getData("application/reactflow");
-    const token = tokens.find((t) => t.id === tokenId);
     if (!token) return;
 
     setTokens((prevTokens) =>
