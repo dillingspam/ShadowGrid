@@ -6,6 +6,7 @@ import type { TokenData } from './token';
 import { cn } from '@/lib/utils';
 import { FogOfWar, generateInitialFog } from './fog-of-war';
 import Image from 'next/image';
+import { TokenEditDialog } from './token-edit-dialog';
 
 const initialTokens: TokenData[] = [
   { id: 'player1', x: 3, y: 4, color: 'hsl(var(--accent))', icon: 'User', size: 1, name: 'Cyber-Ronin' },
@@ -35,6 +36,7 @@ export const MapGrid: FC<MapGridProps> = ({
 }) => {
   const [tokens, setTokens] = useState(initialTokens);
   const [fog, setFog] = useState(() => generateInitialFog(GRID_WIDTH, GRID_HEIGHT, isPlayerView));
+  const [editingToken, setEditingToken] = useState<TokenData | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const fogInteractionState = useRef<'revealing' | 'hiding' | null>(null);
 
@@ -43,8 +45,6 @@ export const MapGrid: FC<MapGridProps> = ({
       return tokens;
     }
     return tokens.filter(token => {
-      // Basic check: is the token's origin point revealed?
-      // A more complex check could verify all squares occupied by a larger token.
       const isVisible = fog[token.y]?.[token.x] === false;
       return isVisible;
     });
@@ -70,7 +70,6 @@ export const MapGrid: FC<MapGridProps> = ({
     const newX = Math.floor(x / GRID_CELL_SIZE);
     const newY = Math.floor(y / GRID_CELL_SIZE);
 
-    // Check for new token drop
     const newTokeDataString = e.dataTransfer.getData("application/json");
     if (newTokeDataString) {
       const { tokenType, icon, name } = JSON.parse(newTokeDataString);
@@ -90,7 +89,6 @@ export const MapGrid: FC<MapGridProps> = ({
       return;
     }
     
-    // Handle existing token move
     const tokenId = e.dataTransfer.getData("application/reactflow");
     const token = tokens.find((t) => t.id === tokenId);
     if (!token) return;
@@ -132,12 +130,26 @@ export const MapGrid: FC<MapGridProps> = ({
     });
   };
 
+  const handleTokenUpdate = (updatedToken: TokenData) => {
+    setTokens(tokens.map(t => t.id === updatedToken.id ? updatedToken : t));
+  };
+  
+  const handleTokenDelete = (tokenId: string) => {
+    setTokens(tokens.filter(t => t.id !== tokenId));
+  };
+  
+  const handleTokenContextMenu = (e: MouseEvent, token: TokenData) => {
+    if (isPlayerView) return;
+    e.preventDefault();
+    setEditingToken(token);
+  };
+
   const onMouseDown = (e: MouseEvent<HTMLDivElement>) => {
     if (isPlayerView || !isFogBrushActive) return;
-    if (e.button === 0) { // Left-click
+    if (e.button === 0) {
       fogInteractionState.current = 'revealing';
-    } else if (e.button === 2) { // Right-click
-      e.preventDefault(); // Prevent context menu
+    } else if (e.button === 2) {
+      e.preventDefault();
       fogInteractionState.current = 'hiding';
     }
     handleFogInteraction(e);
@@ -156,59 +168,69 @@ export const MapGrid: FC<MapGridProps> = ({
     fogInteractionState.current = null;
   };
   
-  const onContextMenu = (e: MouseEvent<HTMLDivElement>) => {
-    if (!isPlayerView && isFogBrushActive) {
+  const onGridContextMenu = (e: MouseEvent<HTMLDivElement>) => {
+    if (isFogBrushActive) {
       e.preventDefault();
     }
   }
 
   return (
-    <div 
-      ref={gridRef}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
-      onMouseLeave={onMouseLeave}
-      onContextMenu={onContextMenu}
-      className={cn(
-        "relative bg-card border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10",
-        !isPlayerView && isFogBrushActive && "cursor-crosshair"
-      )}
-      style={{
-        width: `${GRID_WIDTH * GRID_CELL_SIZE}px`,
-        height: `${GRID_HEIGHT * GRID_CELL_SIZE}px`,
-        maxWidth: '100%',
-        maxHeight: '100%',
-      }}
-    >
-       <div className="absolute inset-0 z-[1] pointer-events-none">
-         {mapImage && (
-          <Image 
-            src={mapImage}
-            alt="Game Map"
-            fill
-            style={{objectFit: "cover"}}
-          />
+    <>
+      <div 
+        ref={gridRef}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseLeave}
+        onContextMenu={onGridContextMenu}
+        className={cn(
+          "relative bg-card border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10",
+          !isPlayerView && isFogBrushActive && "cursor-crosshair"
+        )}
+        style={{
+          width: `${GRID_WIDTH * GRID_CELL_SIZE}px`,
+          height: `${GRID_HEIGHT * GRID_CELL_SIZE}px`,
+          maxWidth: '100%',
+          maxHeight: '100%',
+        }}
+      >
+        <div className="absolute inset-0 z-[1] pointer-events-none">
+          {mapImage && (
+            <Image 
+              src={mapImage}
+              alt="Game Map"
+              fill
+              style={{objectFit: "cover"}}
+            />
+          )}
+        </div>
+        <div className="absolute inset-0 grid-bg z-[2] pointer-events-none" />
+        
+        <div className="relative w-full h-full z-[3]">
+          {visibleTokens.map(token => (
+            <Token key={token.id} onContextMenu={handleTokenContextMenu} isPlayerView={isPlayerView} {...token} />
+          ))}
+        </div>
+        
+        <FogOfWar fog={fog} isPlayerView={isPlayerView} fogOpacity={fogOpacity} />
+
+        {!isPlayerView && (
+          <div className="absolute top-2 left-2 bg-background/80 px-2 py-1 rounded-md text-xs text-muted-foreground z-10">
+            Grid: {GRID_WIDTH}x{GRID_HEIGHT} | Tokens: {tokens.length}
+          </div>
         )}
       </div>
-      <div className="absolute inset-0 grid-bg z-[2] pointer-events-none" />
-      
-      <div className="relative w-full h-full z-[3]">
-        {visibleTokens.map(token => (
-          <Token key={token.id} {...token} />
-        ))}
-      </div>
-      
-      <FogOfWar fog={fog} isPlayerView={isPlayerView} fogOpacity={fogOpacity} />
-
 
       {!isPlayerView && (
-        <div className="absolute top-2 left-2 bg-background/80 px-2 py-1 rounded-md text-xs text-muted-foreground z-10">
-          Grid: {GRID_WIDTH}x{GRID_HEIGHT} | Tokens: {tokens.length}
-        </div>
+         <TokenEditDialog 
+            token={editingToken}
+            onUpdate={handleTokenUpdate}
+            onDelete={handleTokenDelete}
+            onClose={() => setEditingToken(null)}
+         />
       )}
-    </div>
+    </>
   );
 };

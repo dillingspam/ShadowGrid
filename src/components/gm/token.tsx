@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import type { FC, MouseEvent } from 'react';
 import { cn } from '@/lib/utils';
 import { PlayerTokenIcon, MonsterTokenIcon } from '@/components/icons';
 import { Shield, HelpCircle, User, Swords, Skull, Gem, Box, Ghost, Flame } from 'lucide-react';
@@ -16,6 +16,12 @@ export interface TokenData {
   name: string;
 }
 
+interface TokenProps extends TokenData {
+  onContextMenu: (e: MouseEvent, token: TokenData) => void;
+  isPlayerView: boolean;
+}
+
+
 const iconMap: { [key: string]: React.ComponentType<{ className?: string, size?: number }> } = {
   player: PlayerTokenIcon,
   monster: MonsterTokenIcon,
@@ -30,14 +36,22 @@ const iconMap: { [key: string]: React.ComponentType<{ className?: string, size?:
   default: HelpCircle,
 };
 
-export const Token: FC<TokenData> = ({ id, x, y, color, icon, size, name }) => {
-
+export const Token: FC<TokenProps> = (props) => {
+  const { id, x, y, color, icon, size, name, onContextMenu, isPlayerView } = props;
   const IconComponent = iconMap[icon] || iconMap.default;
 
   const onDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+     if(isPlayerView) {
+      e.preventDefault();
+      return;
+    }
     e.dataTransfer.setData("application/reactflow", id);
     e.dataTransfer.effectAllowed = 'move';
   };
+
+  const handleContextMenu = (e: MouseEvent) => {
+    onContextMenu(e, props);
+  }
 
   const tokenStyle: React.CSSProperties = {
     left: `${x * GRID_CELL_SIZE}px`,
@@ -57,10 +71,12 @@ export const Token: FC<TokenData> = ({ id, x, y, color, icon, size, name }) => {
       <Tooltip>
         <TooltipTrigger asChild>
           <div
-            draggable
+            draggable={!isPlayerView}
             onDragStart={onDragStart}
+            onContextMenu={handleContextMenu}
             className={cn(
-              "absolute flex items-center justify-center cursor-grab active:cursor-grabbing transition-all duration-100 hover:scale-105 hover:z-10",
+              "absolute flex items-center justify-center transition-all duration-100",
+              !isPlayerView && "cursor-grab active:cursor-grabbing hover:scale-105 hover:z-10",
               isLargeToken ? 'rounded-lg' : 'rounded-full'
             )}
             style={tokenStyle}
