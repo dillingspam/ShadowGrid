@@ -12,7 +12,7 @@ export interface TokenData {
   y: number;
   color: string;
   icon: string;
-  size: number; // 1 = 1x1, 2 = 2x2, etc.
+  size: number; // 1 = 1x1, etc.
   name: string;
 }
 
@@ -66,6 +66,11 @@ export const Token: FC<TokenProps> = (props) => {
     boxShadow: `0 0 10px ${color}, 0 0 2px black`,
     border: `2px solid hsla(var(--primary-foreground), 0.5)`,
   };
+  
+  const iconContainerStyle: React.CSSProperties = {
+    width: `${size > 1 ? 60 : 75}%`,
+    height: `${size > 1 ? 60 : 75}%`
+  }
 
   const isLargeToken = size > 1;
 
@@ -84,7 +89,7 @@ export const Token: FC<TokenProps> = (props) => {
             )}
             style={tokenStyle}
           >
-            <div className={cn("transition-transform", isLargeToken ? "w-1/2 h-1/2" : "w-3/4 h-3/4")}>
+            <div style={iconContainerStyle} className="transition-transform">
               <IconComponent />
             </div>
           </div>
