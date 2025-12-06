@@ -21,18 +21,18 @@ export default function Home() {
           </p>
         </div>
         <div className="mt-12 flex flex-col sm:flex-row items-center gap-6">
-          <Link href="/gm" legacyBehavior passHref>
-            <Button size="lg" className="w-64 h-16 text-lg font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-shadow duration-300">
+          <Button size="lg" className="w-64 h-16 text-lg font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-shadow duration-300" asChild>
+            <Link href="/gm">
               <Dices className="mr-3 h-6 w-6" />
               Launch GM Screen
-            </Button>
-          </Link>
-          <Link href="/player" legacyBehavior passHref>
-            <Button variant="outline" size="lg" className="w-64 h-16 text-lg font-bold border-accent text-accent shadow-lg shadow-accent/20 hover:shadow-accent/40 hover:bg-accent/10 transition-all duration-300">
+            </Link>
+          </Button>
+          <Button variant="outline" size="lg" className="w-64 h-16 text-lg font-bold border-accent text-accent shadow-lg shadow-accent/20 hover:shadow-accent/40 hover:bg-accent/10 transition-all duration-300" asChild>
+            <Link href="/player">
               <Tv className="mr-3 h-6 w-6" />
               Launch Player View
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
         <footer className="absolute bottom-4 text-sm text-muted-foreground">
           Built for the digital age of roleplaying.

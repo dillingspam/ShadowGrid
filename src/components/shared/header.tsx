@@ -17,12 +17,12 @@ export function Header({ title }: HeaderProps) {
       </Link>
       <div className="flex items-center w-full gap-4">
         <h1 className="flex-1 text-xl font-semibold text-center text-muted-foreground">{title}</h1>
-        <Link href="/" legacyBehavior passHref>
-          <Button variant="ghost" size="icon" className="ml-auto rounded-full">
+        <Button variant="ghost" size="icon" className="ml-auto rounded-full" asChild>
+          <Link href="/">
             <Home className="h-5 w-5" />
             <span className="sr-only">Home</span>
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
     </header>
   );
