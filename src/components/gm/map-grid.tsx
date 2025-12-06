@@ -79,9 +79,12 @@ export const MapGrid: FC<MapGridProps> = ({
         row.map((isFogged, x) => {
           const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
           if (distance <= radius) {
-            if (isFogged === shouldReveal) {
+            // If revealing, we want to turn fog off (isFogged = false)
+            // If hiding, we want to turn fog on (isFogged = true)
+            const newFogState = !shouldReveal;
+            if (isFogged !== newFogState) {
               hasChanged = true;
-              return !shouldReveal;
+              return newFogState;
             }
           }
           return isFogged;
@@ -97,6 +100,7 @@ export const MapGrid: FC<MapGridProps> = ({
     if (e.button === 0) { // Left-click
       fogInteractionState.current = 'revealing';
     } else if (e.button === 2) { // Right-click
+      e.preventDefault(); // Prevent context menu
       fogInteractionState.current = 'hiding';
     }
     handleFogInteraction(e);
