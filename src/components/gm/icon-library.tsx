@@ -114,33 +114,33 @@ const IconCategory = ({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-2" side="right" align="start">
-          <DropdownMenu>
-            <div className="grid grid-cols-4 gap-2">
-              {tokens.map((token) => (
-                <div key={token.id} className="relative group">
-                  <DraggableToken token={token} />
-                  <div className="absolute top-0 right-0 hidden group-hover:block">
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-6 w-6">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => setEditingToken(token)}>
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() => onTokenDelete(token.id)}
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                  </div>
+          <div className="grid grid-cols-4 gap-2">
+            {tokens.map((token) => (
+              <div key={token.id} className="relative group">
+                <DraggableToken token={token} />
+                <div className="absolute top-0 right-0 hidden group-hover:block">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-6 w-6">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={() => setEditingToken(token)}>
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onClick={() => onTokenDelete(token.id)}
+                      >
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-              ))}
-            </div>
-          </DropdownMenu>
+              </div>
+            ))}
+          </div>
         </PopoverContent>
       </Popover>
       <IconEditDialog
