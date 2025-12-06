@@ -1,7 +1,7 @@
 import type { FC, MouseEvent } from 'react';
 import { cn } from '@/lib/utils';
 import { PlayerTokenIcon, MonsterTokenIcon } from '@/components/icons';
-import { Shield, HelpCircle, User, Swords, Skull, Gem, Box, Ghost, Flame } from 'lucide-react';
+import { Shield, HelpCircle, User, Swords, Skull, Gem, Box, Ghost, Flame, VenetianMask, ShoppingBag, Users } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const GRID_CELL_SIZE = 40; // in px
@@ -22,17 +22,20 @@ interface TokenProps extends TokenData {
 }
 
 
-const iconMap: { [key: string]: React.ComponentType<{ className?: string, size?: number }> } = {
-  player: PlayerTokenIcon,
-  monster: MonsterTokenIcon,
-  User: User,
-  Shield: Shield,
-  Swords: Swords,
-  Skull: Skull,
-  Gem: Gem,
-  Box: Box,
-  Ghost: Ghost,
-  Flame: Flame,
+export const iconMap: { [key: string]: React.ComponentType<{ className?: string, size?: number }> } = {
+  Player: PlayerTokenIcon,
+  Monster: MonsterTokenIcon,
+  User,
+  Shield,
+  Swords,
+  Skull,
+  Gem,
+  Box,
+  Ghost,
+  Flame,
+  VenetianMask,
+  ShoppingBag,
+  Users,
   default: HelpCircle,
 };
 
