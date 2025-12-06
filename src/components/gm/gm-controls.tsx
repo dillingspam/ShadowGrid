@@ -1,3 +1,5 @@
+'use client';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -5,7 +7,12 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Dices, ShieldQuestion } from 'lucide-react';
 
-export function GmControls() {
+interface GmControlsProps {
+  fogOpacity: number;
+  onFogOpacityChange: (value: number) => void;
+}
+
+export function GmControls({ fogOpacity, onFogOpacityChange }: GmControlsProps) {
   return (
     <div className="p-4">
       <Tabs defaultValue="environment" className="w-full">
@@ -17,7 +24,13 @@ export function GmControls() {
         <TabsContent value="environment" className="mt-6 space-y-6">
           <div className="space-y-3">
             <Label htmlFor="fog-opacity">Fog of War Opacity</Label>
-            <Slider id="fog-opacity" defaultValue={[80]} max={100} step={1} />
+            <Slider 
+              id="fog-opacity" 
+              value={[fogOpacity]}
+              onValueChange={(value) => onFogOpacityChange(value[0])}
+              max={100} 
+              step={1} 
+            />
           </div>
           <div className="flex items-center justify-between">
             <Label htmlFor="grid-overlay" className="flex-grow">Show Grid Overlay</Label>
