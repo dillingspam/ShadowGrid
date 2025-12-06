@@ -1,7 +1,7 @@
 import type { FC, MouseEvent } from 'react';
 import { cn } from '@/lib/utils';
 import { PlayerTokenIcon, MonsterTokenIcon } from '@/components/icons';
-import { Shield, HelpCircle, User, Swords, Skull, Gem, Box, Ghost, Flame, VenetianMask, ShoppingBag, Users, PlusCircle } from 'lucide-react';
+import { Shield, HelpCircle, User, Swords, Skull, Gem, Box, Ghost, Flame, VenetianMask, ShoppingBag, Users, PlusCircle, FolderPlus } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const GRID_CELL_SIZE = 40; // in px
@@ -37,6 +37,7 @@ export const iconMap: { [key: string]: React.ComponentType<{ className?: string,
   ShoppingBag,
   Users,
   PlusCircle,
+  FolderPlus,
   default: HelpCircle,
 };
 
