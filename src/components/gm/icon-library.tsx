@@ -291,7 +291,7 @@ export function IconLibrary() {
         <h3 className="text-lg font-semibold mb-4 font-headline text-primary" style={{ textShadow: '0 0 5px hsl(var(--primary))' }}>
           Token Library
         </h3>
-        <ScrollArea className="h-[300px] -mr-4 pr-4">
+        <ScrollArea className="max-h-[400px] -mr-4 pr-4">
           <div className="space-y-2">
             {categories.map(category => (
                <IconCategory
