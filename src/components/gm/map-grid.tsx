@@ -171,20 +171,19 @@ export const MapGrid: FC<MapGridProps> = ({
       }}
     >
       <div className="absolute inset-0 z-0">
-        {mapImage && (
+         {mapImage && (
           <Image 
             src={mapImage}
             alt="Game Map"
             fill
             style={{objectFit: "cover"}}
-            className="absolute inset-0"
+            className="absolute inset-0 z-[1]"
           />
         )}
+        <div className="absolute inset-0 grid-bg z-[2]" />
       </div>
       
-      <div className="absolute inset-0 grid-bg z-[1]" />
-
-      <div className="relative w-full h-full z-[2]">
+      <div className="relative w-full h-full z-[3]">
         <FogOfWar fog={fog} isPlayerView={isPlayerView} fogOpacity={fogOpacity} />
         {tokens.map(token => (
           <Token key={token.id} {...token} />

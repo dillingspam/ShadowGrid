@@ -14,11 +14,9 @@ export function generateInitialFog(width: number, height: number, revealed: bool
 }
 
 export function FogOfWar({ fog, isPlayerView, fogOpacity }: FogOfWarProps) {
-  const fogStyle: React.CSSProperties = isPlayerView
+  const fogStyle = isPlayerView
     ? { backgroundColor: 'hsl(var(--background))' }
-    : {
-        backgroundColor: `hsla(0, 0%, 13%, ${fogOpacity / 100})`,
-      };
+    : { backgroundColor: `hsla(0, 0%, 13%, ${fogOpacity / 100})` };
 
   const fogCells = useMemo(() => {
     return fog.flatMap((row, y) =>
@@ -32,13 +30,17 @@ export function FogOfWar({ fog, isPlayerView, fogOpacity }: FogOfWarProps) {
               top: y * GRID_CELL_SIZE,
               width: GRID_CELL_SIZE,
               height: GRID_CELL_SIZE,
-              ...fogStyle
+              ...fogStyle,
             }}
           />
         ) : null
       )
     );
   }, [fog, fogStyle]);
+
+  if (!fogCells.some(cell => cell !== null)) {
+    return null;
+  }
 
   return <div className="absolute inset-0 pointer-events-none z-[5]">{fogCells}</div>;
 }
