@@ -19,17 +19,20 @@ import {
   Users,
   VenetianMask,
   ShoppingBag,
-  MoreVertical,
+  Edit,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { IconEditDialog } from './icon-edit-dialog';
 import { iconMap } from './token';
+import { cn } from '@/lib/utils';
 
 export interface TemplateToken {
   id: string;
@@ -55,7 +58,6 @@ const initialItems: TemplateToken[] = [
   { id: 'item-template-2', name: 'Objective', tokenType: 'item', iconName: 'Gem' },
 ];
 
-
 const DraggableToken = ({ token }: { token: TemplateToken }) => {
   const onDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     const dragData = {
@@ -78,7 +80,7 @@ const DraggableToken = ({ token }: { token: TemplateToken }) => {
           onDragStart={onDragStart}
           className="p-3 flex aspect-square items-center justify-center rounded-lg bg-background hover:bg-secondary cursor-grab active:cursor-grabbing transition-all text-muted-foreground hover:text-accent hover:drop-shadow-[0_0_5px_hsl(var(--accent))]"
         >
-          <IconComponent size={28} />
+          <IconComponent size={32} />
         </div>
       </TooltipTrigger>
       <TooltipContent side="top">
@@ -105,43 +107,47 @@ const IconCategory = ({
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      <Dialog>
+        <DialogTrigger asChild>
           <Button variant="outline" className="w-full justify-start">
             {icon}
             <span className="ml-2">{title}</span>
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-auto p-2" side="right" align="start">
-          <div className="grid grid-cols-4 gap-2">
-            {tokens.map((token) => (
-              <div key={token.id} className="relative group">
-                <DraggableToken token={token} />
-                <div className="absolute top-0 right-0 hidden group-hover:block">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-6 w-6">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem onClick={() => setEditingToken(token)}>
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-destructive"
-                        onClick={() => onTokenDelete(token.id)}
-                      >
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{title} Presets</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh] -mx-4 px-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 py-4 pr-2">
+              {tokens.map((token) => (
+                <div key={token.id} className="flex flex-col items-center gap-2">
+                  <DraggableToken token={token} />
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => setEditingToken(token)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-destructive hover:text-destructive"
+                      onClick={() => onTokenDelete(token.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
+              ))}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
       <IconEditDialog
         token={editingToken}
         onUpdate={(updatedToken) => {
@@ -172,7 +178,6 @@ export function IconLibrary() {
   ) => (id: string) => {
     setter(list.filter((t) => t.id !== id));
   };
-
 
   return (
     <TooltipProvider delayDuration={100}>
