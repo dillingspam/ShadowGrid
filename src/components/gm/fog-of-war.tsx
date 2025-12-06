@@ -18,7 +18,6 @@ export function FogOfWar({ fog, isPlayerView, fogOpacity }: FogOfWarProps) {
     ? { backgroundColor: 'hsl(var(--background))' }
     : {
         backgroundColor: `hsla(0, 0%, 13%, ${fogOpacity / 100})`,
-        backdropFilter: 'blur(1px)',
       };
 
   const fogCells = useMemo(() => {
