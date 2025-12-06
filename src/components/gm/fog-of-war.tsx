@@ -14,7 +14,7 @@ export function generateInitialFog(width: number, height: number, revealed: bool
 }
 
 export function FogOfWar({ fog, isPlayerView, fogOpacity }: FogOfWarProps) {
-  const fogStyle: React.CSSProperties = isPlayerView 
+  const fogStyle: React.CSSProperties = isPlayerView
     ? { backgroundColor: 'hsl(var(--background))' }
     : {
         backgroundColor: `hsla(0, 0%, 13%, ${fogOpacity / 100})`,
@@ -32,7 +32,7 @@ export function FogOfWar({ fog, isPlayerView, fogOpacity }: FogOfWarProps) {
               top: y * GRID_CELL_SIZE,
               width: GRID_CELL_SIZE,
               height: GRID_CELL_SIZE,
-              ...fogStyle,
+              ...fogStyle
             }}
           />
         ) : null
