@@ -64,20 +64,20 @@ export function IconLibrary() {
         <ScrollArea className="flex-1 -mr-4 pr-4">
           <div className="space-y-2">
             <IconCategory title="Players & NPCs" icon={<Users className="w-4 h-4" />}>
-              <IconWrapper tooltip="Player" tokenType="player" iconName="player"><User size={28} /></IconWrapper>
-              <IconWrapper tooltip="Guardian" tokenType="player" iconName="player"><Shield size={28} /></IconWrapper>
+              <IconWrapper tooltip="Player" tokenType="player" iconName="User"><User size={28} /></IconWrapper>
+              <IconWrapper tooltip="Guardian" tokenType="player" iconName="Shield"><Shield size={28} /></IconWrapper>
             </IconCategory>
 
             <IconCategory title="Monsters" icon={<VenetianMask className="w-4 h-4" />}>
-              <IconWrapper tooltip="Undead" tokenType="monster" iconName="monster"><Skull size={28} /></IconWrapper>
-              <IconWrapper tooltip="Spirit" tokenType="monster" iconName="monster"><Ghost size={28} /></IconWrapper>
-              <IconWrapper tooltip="Beast" tokenType="monster" iconName="monster"><Flame size={28} /></IconWrapper>
-              <IconWrapper tooltip="Melee" tokenType="monster" iconName="monster"><Swords size={28} /></IconWrapper>
+              <IconWrapper tooltip="Undead" tokenType="monster" iconName="Skull"><Skull size={28} /></IconWrapper>
+              <IconWrapper tooltip="Spirit" tokenType="monster" iconName="Ghost"><Ghost size={28} /></IconWrapper>
+              <IconWrapper tooltip="Beast" tokenType="monster" iconName="Flame"><Flame size={28} /></IconWrapper>
+              <IconWrapper tooltip="Melee" tokenType="monster" iconName="Swords"><Swords size={28} /></IconWrapper>
             </IconCategory>
 
             <IconCategory title="Items" icon={<ShoppingBag className="w-4 h-4" />}>
-                <IconWrapper tooltip="Treasure" tokenType="item" iconName="item"><Box size={28} /></IconWrapper>
-                <IconWrapper tooltip="Objective" tokenType="item" iconName="item"><Gem size={28} /></IconWrapper>
+                <IconWrapper tooltip="Treasure" tokenType="item" iconName="Box"><Box size={28} /></IconWrapper>
+                <IconWrapper tooltip="Objective" tokenType="item" iconName="Gem"><Gem size={28} /></IconWrapper>
             </IconCategory>
           </div>
         </ScrollArea>

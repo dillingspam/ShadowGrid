@@ -8,11 +8,11 @@ import { FogOfWar, generateInitialFog } from './fog-of-war';
 import Image from 'next/image';
 
 const initialTokens: TokenData[] = [
-  { id: 'player1', x: 3, y: 4, color: 'hsl(var(--accent))', icon: 'player', size: 1, name: 'Cyber-Ronin' },
-  { id: 'player2', x: 5, y: 5, color: 'hsl(var(--accent))', icon: 'player', size: 1, name: 'Net-Witch' },
-  { id: 'monster1', x: 10, y: 8, color: 'hsl(var(--destructive))', icon: 'monster', size: 2, name: 'Security Drone' },
-  { id: 'boss', x: 12, y: 2, color: 'hsl(var(--destructive))', icon: 'monster', size: 3, name: 'Alpha Construct' },
-  { id: 'item1', x: 15, y: 12, color: 'hsl(var(--primary))', icon: 'item', size: 1, name: 'Data-Spike' },
+  { id: 'player1', x: 3, y: 4, color: 'hsl(var(--accent))', icon: 'User', size: 1, name: 'Cyber-Ronin' },
+  { id: 'player2', x: 5, y: 5, color: 'hsl(var(--accent))', icon: 'Shield', size: 1, name: 'Net-Witch' },
+  { id: 'monster1', x: 10, y: 8, color: 'hsl(var(--destructive))', icon: 'Skull', size: 2, name: 'Security Drone' },
+  { id: 'boss', x: 12, y: 2, color: 'hsl(var(--destructive))', icon: 'Ghost', size: 3, name: 'Alpha Construct' },
+  { id: 'item1', x: 15, y: 12, color: 'hsl(var(--primary))', icon: 'Gem', size: 1, name: 'Data-Spike' },
 ];
 
 const GRID_WIDTH = 40;

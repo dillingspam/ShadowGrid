@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { cn } from '@/lib/utils';
 import { PlayerTokenIcon, MonsterTokenIcon } from '@/components/icons';
-import { Shield, HelpCircle } from 'lucide-react';
+import { Shield, HelpCircle, User, Swords, Skull, Gem, Box, Ghost, Flame } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const GRID_CELL_SIZE = 40; // in px
@@ -11,20 +11,28 @@ export interface TokenData {
   x: number;
   y: number;
   color: string;
-  icon: 'player' | 'monster' | 'item';
+  icon: string;
   size: number; // 1 = 1x1, 2 = 2x2, etc.
   name: string;
 }
 
+const iconMap: { [key: string]: React.ComponentType<{ className?: string, size?: number }> } = {
+  player: PlayerTokenIcon,
+  monster: MonsterTokenIcon,
+  User: User,
+  Shield: Shield,
+  Swords: Swords,
+  Skull: Skull,
+  Gem: Gem,
+  Box: Box,
+  Ghost: Ghost,
+  Flame: Flame,
+  default: HelpCircle,
+};
+
 export const Token: FC<TokenData> = ({ id, x, y, color, icon, size, name }) => {
-  const IconComponent = () => {
-    switch (icon) {
-      case 'player': return <PlayerTokenIcon className="w-full h-full" />;
-      case 'monster': return <MonsterTokenIcon className="w-full h-full" />;
-      case 'item': return <Shield className="w-3/4 h-3/4" />;
-      default: return <HelpCircle className="w-full h-full" />;
-    }
-  };
+
+  const IconComponent = iconMap[icon] || iconMap.default;
 
   const onDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.setData("application/reactflow", id);
