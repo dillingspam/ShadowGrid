@@ -94,7 +94,7 @@ const DraggableToken = ({ token }: { token: TemplateToken }) => {
         <div
           draggable
           onDragStart={onDragStart}
-          className="p-3 flex aspect-square items-center justify-center rounded-lg bg-background hover:bg-secondary cursor-grab active:cursor-grabbing transition-all text-muted-foreground hover:text-accent hover:drop-shadow-[0_0_5px_hsl(var(--accent))]"
+          className="flex aspect-square items-center justify-center rounded-lg bg-background hover:bg-secondary cursor-grab active:cursor-grabbing transition-all text-muted-foreground hover:text-accent hover:drop-shadow-[0_0_5px_hsl(var(--accent))]"
         >
           <IconComponent size={32} />
         </div>
@@ -178,7 +178,7 @@ const IconCategory = ({
                       <button onClick={() => {
                         setIsCreating(true);
                         setEditingToken({id: '', name: 'New Preset', iconName: 'HelpCircle', tokenType: 'item' });
-                      }} className="p-3 flex aspect-square items-center justify-center rounded-lg bg-transparent hover:bg-secondary cursor-pointer transition-all text-muted-foreground hover:text-primary">
+                      }} className="flex aspect-square items-center justify-center rounded-lg bg-transparent hover:bg-secondary cursor-pointer transition-all text-muted-foreground hover:text-primary">
                           <PlusCircle size={32} />
                       </button>
                   </TooltipTrigger>
@@ -197,7 +197,10 @@ const IconCategory = ({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => setEditingCategory(category)}>
+            <DropdownMenuItem onClick={() => {
+                setIsCreating(false);
+                setEditingCategory(category);
+              }}>
               <Edit className="mr-2 h-4 w-4" />
               Edit Category
             </DropdownMenuItem>
@@ -224,13 +227,13 @@ const IconCategory = ({
         onClose={() => setEditingToken(null)}
       />
 
-      {editingCategory && !isCreating && (
+      {editingCategory && (
         <CategoryEditDialog
           category={editingCategory}
-          isCreating={false}
+          isCreating={isCreating}
           onUpdate={onCategoryUpdate}
           onClose={() => setEditingCategory(null)}
-          onCreate={() => {}}
+          onCreate={onTokenAdd}
         />
       )}
     </>
@@ -287,8 +290,8 @@ export function IconLibrary() {
 
   return (
     <TooltipProvider delayDuration={100}>
-      <div className="p-4">
-        <h3 className="text-lg font-semibold mb-4 font-headline text-primary" style={{ textShadow: '0 0 5px hsl(var(--primary))' }}>
+      <div className="p-4 space-y-4">
+        <h3 className="text-lg font-semibold font-headline text-primary" style={{ textShadow: '0 0 5px hsl(var(--primary))' }}>
           Token Library
         </h3>
         <ScrollArea className="max-h-[400px] -mr-4 pr-4">
@@ -306,25 +309,31 @@ export function IconLibrary() {
             ))}
           </div>
         </ScrollArea>
-        <Separator className="my-4" />
-        <Button 
-          variant="outline" 
-          className="w-full"
-          onClick={() => {
-            setIsCreatingCategory(true);
-            setEditingCategory({ id: '', title: 'New Category', iconName: 'FolderPlus'});
-          }}
-        >
-          <FolderPlus className="mr-2 h-4 w-4" />
-          Add Category
-        </Button>
+        <div>
+          <Separator className="my-4" />
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={() => {
+              setIsCreatingCategory(true);
+              setEditingCategory({ id: '', title: 'New Category', iconName: 'FolderPlus'});
+            }}
+          >
+            <FolderPlus className="mr-2 h-4 w-4" />
+            Add Category
+          </Button>
+        </div>
       </div>
 
-       {editingCategory && isCreatingCategory && (
+       {editingCategory && (
          <CategoryEditDialog
             category={editingCategory}
             isCreating={isCreatingCategory}
-            onUpdate={() => {}}
+            onUpdate={(cat) => {
+              handleCategoryUpdate(cat);
+              setIsCreatingCategory(false);
+              setEditingCategory(null);
+            }}
             onCreate={(catData) => {
               handleCategoryAdd(catData)
               setIsCreatingCategory(false);
