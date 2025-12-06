@@ -14,6 +14,7 @@ import {
   Edit,
   Trash2,
   MoreVertical,
+  PlusCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { IconEditDialog } from './icon-edit-dialog';
@@ -25,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Separator } from '../ui/separator';
 
 export interface TemplateToken {
   id: string;
@@ -86,16 +88,25 @@ const IconCategory = ({
   title,
   icon,
   tokens,
+  tokenType,
   onTokenUpdate,
   onTokenDelete,
+  onTokenAdd,
 }: {
   title: string;
   icon: React.ReactNode;
   tokens: TemplateToken[];
+  tokenType: 'player' | 'monster' | 'item';
   onTokenUpdate: (token: TemplateToken) => void;
   onTokenDelete: (id: string) => void;
+  onTokenAdd: (token: Omit<TemplateToken, 'id'>) => void;
 }) => {
   const [editingToken, setEditingToken] = useState<TemplateToken | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+
+  const handleCreate = (newTokenData: Omit<TemplateToken, 'id'>) => {
+    onTokenAdd(newTokenData);
+  }
 
   return (
     <>
@@ -119,7 +130,10 @@ const IconCategory = ({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      <DropdownMenuItem onClick={() => setEditingToken(token)}>
+                      <DropdownMenuItem onClick={() => {
+                        setIsCreating(false);
+                        setEditingToken(token);
+                      }}>
                         <Edit className="mr-2 h-4 w-4" />
                         Edit
                       </DropdownMenuItem>
@@ -135,16 +149,31 @@ const IconCategory = ({
                 </div>
               </div>
             ))}
+             <Tooltip>
+                <TooltipTrigger asChild>
+                    <button onClick={() => {
+                      setIsCreating(true);
+                      setEditingToken({id: '', name: 'New Preset', iconName: 'HelpCircle', tokenType});
+                    }} className="p-3 flex aspect-square items-center justify-center rounded-lg bg-transparent hover:bg-secondary cursor-pointer transition-all text-muted-foreground hover:text-primary">
+                        <PlusCircle size={32} />
+                    </button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                    <p>Add new preset</p>
+                </TooltipContent>
+            </Tooltip>
           </div>
         </PopoverContent>
       </Popover>
 
       <IconEditDialog
         token={editingToken}
+        isCreating={isCreating}
         onUpdate={(updatedToken) => {
           onTokenUpdate(updatedToken);
           setEditingToken(null);
         }}
+        onCreate={handleCreate}
         onClose={() => setEditingToken(null)}
       />
     </>
@@ -170,6 +199,14 @@ export function IconLibrary() {
     setter(list.filter((t) => t.id !== id));
   };
 
+  const handleAdd = (
+    setter: React.Dispatch<React.SetStateAction<TemplateToken[]>>
+  ) => (newTokenData: Omit<TemplateToken, 'id'>) => {
+    const newId = `template-${newTokenData.tokenType}-${Date.now()}`;
+    setter(prev => [...prev, { ...newTokenData, id: newId }]);
+  };
+
+
   return (
     <TooltipProvider delayDuration={100}>
       <div className="p-4 flex flex-col h-[55%]">
@@ -182,22 +219,28 @@ export function IconLibrary() {
               title="Players & NPCs"
               icon={<Users className="w-4 h-4" />}
               tokens={players}
+              tokenType="player"
               onTokenUpdate={handleUpdate(players, setPlayers)}
               onTokenDelete={handleDelete(players, setPlayers)}
+              onTokenAdd={handleAdd(setPlayers)}
             />
             <IconCategory
               title="Monsters"
               icon={<VenetianMask className="w-4 h-4" />}
               tokens={monsters}
+              tokenType="monster"
               onTokenUpdate={handleUpdate(monsters, setMonsters)}
               onTokenDelete={handleDelete(monsters, setMonsters)}
+              onTokenAdd={handleAdd(setMonsters)}
             />
             <IconCategory
               title="Items"
               icon={<ShoppingBag className="w-4 h-4" />}
               tokens={items}
+              tokenType="item"
               onTokenUpdate={handleUpdate(items, setItems)}
               onTokenDelete={handleDelete(items, setItems)}
+              onTokenAdd={handleAdd(setItems)}
             />
           </div>
         </ScrollArea>

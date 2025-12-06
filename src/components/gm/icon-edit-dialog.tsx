@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Save } from 'lucide-react';
+import { Save, PlusCircle } from 'lucide-react';
 import type { TemplateToken } from './icon-library';
 import { iconMap } from './token';
 import { ScrollArea } from '../ui/scroll-area';
@@ -24,7 +24,9 @@ import {
 
 interface IconEditDialogProps {
   token: TemplateToken | null;
+  isCreating: boolean;
   onUpdate: (updatedToken: TemplateToken) => void;
+  onCreate: (newToken: Omit<TemplateToken, 'id'>) => void;
   onClose: () => void;
 }
 
@@ -33,31 +35,38 @@ const availableIcons = Object.keys(iconMap).filter(
   (key) => key !== 'default' && key !== 'Player' && key !== 'Monster'
 );
 
-export function IconEditDialog({ token, onUpdate, onClose }: IconEditDialogProps) {
+export function IconEditDialog({ token, isCreating, onUpdate, onCreate, onClose }: IconEditDialogProps) {
   const [name, setName] = useState('');
   const [iconName, setIconName] = useState('');
 
   useEffect(() => {
     if (token) {
-      setName(token.name);
-      setIconName(token.iconName);
+      setName(isCreating ? 'New Preset' : token.name);
+      setIconName(isCreating ? 'HelpCircle' : token.iconName);
     }
-  }, [token]);
+  }, [token, isCreating]);
 
   if (!token) {
     return null;
   }
 
   const handleSave = () => {
-    onUpdate({ ...token, name, iconName });
+    if (isCreating) {
+      onCreate({ name, iconName, tokenType: token.tokenType });
+    } else {
+      onUpdate({ ...token, name, iconName });
+    }
     onClose();
   };
+
+  const dialogTitle = isCreating ? "Create New Preset" : `Edit Preset: ${token.name}`;
+  const SaveIcon = isCreating ? PlusCircle : Save;
 
   return (
     <Dialog open={!!token} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Template: {token.name}</DialogTitle>
+          <DialogTitle>{dialogTitle}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-6 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
@@ -111,7 +120,7 @@ export function IconEditDialog({ token, onUpdate, onClose }: IconEditDialogProps
         </div>
         <DialogFooter>
           <Button onClick={handleSave}>
-            <Save className="mr-2 h-4 w-4" /> Save Changes
+            <SaveIcon className="mr-2 h-4 w-4" /> {isCreating ? "Create Preset" : "Save Changes"}
           </Button>
         </DialogFooter>
       </DialogContent>
