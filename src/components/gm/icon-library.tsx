@@ -1,7 +1,7 @@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { User, Shield, Swords, Skull, Gem, Box, Ghost, Dragon } from 'lucide-react';
+import { User, Shield, Swords, Skull, Gem, Box, Ghost, Flame } from 'lucide-react';
 
 const IconWrapper = ({ children, tooltip }: { children: React.ReactNode; tooltip: string }) => (
   <Tooltip>
@@ -38,7 +38,7 @@ export function IconLibrary() {
               <div className="grid grid-cols-4 gap-2">
                 <IconWrapper tooltip="Undead"><Skull size={28} /></IconWrapper>
                 <IconWrapper tooltip="Spirit"><Ghost size={28} /></IconWrapper>
-                <IconWrapper tooltip="Beast"><Dragon size={28} /></IconWrapper>
+                <IconWrapper tooltip="Beast"><Flame size={28} /></IconWrapper>
                 <IconWrapper tooltip="Melee"><Swords size={28} /></IconWrapper>
               </div>
             </div>
