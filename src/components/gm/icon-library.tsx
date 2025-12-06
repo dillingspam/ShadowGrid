@@ -23,7 +23,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { CategoryEditDialog } from './category-edit-dialog';
 import { Separator } from '../ui/separator';
 
@@ -47,8 +51,18 @@ const initialCategories: TokenCategory[] = [
     title: 'Players & NPCs',
     iconName: 'Users',
     tokens: [
-      { id: 'player-template-1', name: 'Player', tokenType: 'player', iconName: 'Shield' },
-      { id: 'player-template-2', name: 'Guardian', tokenType: 'player', iconName: 'Shield' },
+      {
+        id: 'player-template-1',
+        name: 'Player',
+        tokenType: 'player',
+        iconName: 'Shield',
+      },
+      {
+        id: 'player-template-2',
+        name: 'Guardian',
+        tokenType: 'player',
+        iconName: 'Shield',
+      },
     ],
   },
   {
@@ -56,10 +70,30 @@ const initialCategories: TokenCategory[] = [
     title: 'Monsters',
     iconName: 'VenetianMask',
     tokens: [
-      { id: 'monster-template-1', name: 'Undead', tokenType: 'monster', iconName: 'Skull' },
-      { id: 'monster-template-2', name: 'Spirit', tokenType: 'monster', iconName: 'Ghost' },
-      { id: 'monster-template-3', name: 'Beast', tokenType: 'monster', iconName: 'Flame' },
-      { id: 'monster-template-4', name: 'Melee', tokenType: 'monster', iconName: 'Swords' },
+      {
+        id: 'monster-template-1',
+        name: 'Undead',
+        tokenType: 'monster',
+        iconName: 'Skull',
+      },
+      {
+        id: 'monster-template-2',
+        name: 'Spirit',
+        tokenType: 'monster',
+        iconName: 'Ghost',
+      },
+      {
+        id: 'monster-template-3',
+        name: 'Beast',
+        tokenType: 'monster',
+        iconName: 'Flame',
+      },
+      {
+        id: 'monster-template-4',
+        name: 'Melee',
+        tokenType: 'monster',
+        iconName: 'Swords',
+      },
     ],
   },
   {
@@ -72,7 +106,6 @@ const initialCategories: TokenCategory[] = [
     ],
   },
 ];
-
 
 const DraggableToken = ({ token }: { token: TemplateToken }) => {
   const onDragStart = (e: React.DragEvent<HTMLDivElement>) => {
@@ -96,7 +129,7 @@ const DraggableToken = ({ token }: { token: TemplateToken }) => {
           onDragStart={onDragStart}
           className="flex aspect-square items-center justify-center rounded-lg bg-background hover:bg-secondary cursor-grab active:cursor-grabbing transition-all text-muted-foreground hover:text-accent hover:drop-shadow-[0_0_5px_hsl(var(--accent))]"
         >
-          <IconComponent size={32} />
+          <IconComponent className="h-8 w-8" />
         </div>
       </TooltipTrigger>
       <TooltipContent side="top">
@@ -122,12 +155,14 @@ const IconCategory = ({
   onCategoryDelete: (categoryId: string) => void;
 }) => {
   const [editingToken, setEditingToken] = useState<TemplateToken | null>(null);
-  const [editingCategory, setEditingCategory] = useState<TokenCategory | null>(null);
+  const [editingCategory, setEditingCategory] = useState<TokenCategory | null>(
+    null
+  );
   const [isCreating, setIsCreating] = useState(false);
 
   const handleCreate = (newTokenData: Omit<TemplateToken, 'id'>) => {
     onTokenAdd(category.id, newTokenData);
-  }
+  };
 
   const CategoryIcon = iconMap[category.iconName] || iconMap.default;
 
@@ -154,10 +189,12 @@ const IconCategory = ({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => {
-                          setIsCreating(false);
-                          setEditingToken(token);
-                        }}>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setIsCreating(false);
+                            setEditingToken(token);
+                          }}
+                        >
                           <Edit className="mr-2 h-4 w-4" />
                           Edit
                         </DropdownMenuItem>
@@ -174,17 +211,25 @@ const IconCategory = ({
                 </div>
               ))}
               <Tooltip>
-                  <TooltipTrigger asChild>
-                      <button onClick={() => {
-                        setIsCreating(true);
-                        setEditingToken({id: '', name: 'New Preset', iconName: 'HelpCircle', tokenType: 'item' });
-                      }} className="flex aspect-square items-center justify-center rounded-lg bg-transparent hover:bg-secondary cursor-pointer transition-all text-muted-foreground hover:text-primary">
-                          <PlusCircle size={32} />
-                      </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                      <p>Add new preset</p>
-                  </TooltipContent>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => {
+                      setIsCreating(true);
+                      setEditingToken({
+                        id: '',
+                        name: 'New Preset',
+                        iconName: 'HelpCircle',
+                        tokenType: 'item',
+                      });
+                    }}
+                    className="flex aspect-square items-center justify-center rounded-lg bg-transparent hover:bg-secondary cursor-pointer transition-all text-muted-foreground hover:text-primary"
+                  >
+                    <PlusCircle size={32} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <p>Add new preset</p>
+                </TooltipContent>
               </Tooltip>
             </div>
           </PopoverContent>
@@ -192,15 +237,21 @@ const IconCategory = ({
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-9 w-9 ml-1 shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 ml-1 shrink-0"
+            >
               <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => {
+            <DropdownMenuItem
+              onClick={() => {
                 setIsCreating(false);
                 setEditingCategory(category);
-              }}>
+              }}
+            >
               <Edit className="mr-2 h-4 w-4" />
               Edit Category
             </DropdownMenuItem>
@@ -214,7 +265,6 @@ const IconCategory = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
 
       <IconEditDialog
         token={editingToken}
@@ -241,63 +291,94 @@ const IconCategory = ({
 };
 
 export function IconLibrary() {
-  const [categories, setCategories] = useState<TokenCategory[]>(initialCategories);
-  const [editingCategory, setEditingCategory] = useState<Omit<TokenCategory, 'tokens'> | null>(null);
+  const [categories, setCategories] =
+    useState<TokenCategory[]>(initialCategories);
+  const [
+    editingCategory,
+    setEditingCategory,
+  ] = useState<Omit<TokenCategory, 'tokens'> | null>(null);
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
 
-  const handleTokenUpdate = (categoryId: string, updatedToken: TemplateToken) => {
-    setCategories(prev => prev.map(cat => 
-      cat.id === categoryId 
-        ? { ...cat, tokens: cat.tokens.map(t => t.id === updatedToken.id ? updatedToken : t) }
-        : cat
-    ));
+  const handleTokenUpdate = (
+    categoryId: string,
+    updatedToken: TemplateToken
+  ) => {
+    setCategories((prev) =>
+      prev.map((cat) =>
+        cat.id === categoryId
+          ? {
+              ...cat,
+              tokens: cat.tokens.map((t) =>
+                t.id === updatedToken.id ? updatedToken : t
+              ),
+            }
+          : cat
+      )
+    );
   };
 
   const handleTokenDelete = (categoryId: string, tokenId: string) => {
-    setCategories(prev => prev.map(cat => 
-      cat.id === categoryId 
-        ? { ...cat, tokens: cat.tokens.filter(t => t.id !== tokenId) }
-        : cat
-    ));
+    setCategories((prev) =>
+      prev.map((cat) =>
+        cat.id === categoryId
+          ? { ...cat, tokens: cat.tokens.filter((t) => t.id !== tokenId) }
+          : cat
+      )
+    );
   };
 
-  const handleTokenAdd = (categoryId: string, newTokenData: Omit<TemplateToken, 'id'>) => {
-    setCategories(prev => prev.map(cat => {
-      if (cat.id === categoryId) {
-        const newId = `template-${newTokenData.tokenType}-${Date.now()}`;
-        return { ...cat, tokens: [...cat.tokens, { ...newTokenData, id: newId }] };
-      }
-      return cat;
-    }));
+  const handleTokenAdd = (
+    categoryId: string,
+    newTokenData: Omit<TemplateToken, 'id'>
+  ) => {
+    setCategories((prev) =>
+      prev.map((cat) => {
+        if (cat.id === categoryId) {
+          const newId = `template-${newTokenData.tokenType}-${Date.now()}`;
+          return {
+            ...cat,
+            tokens: [...cat.tokens, { ...newTokenData, id: newId }],
+          };
+        }
+        return cat;
+      })
+    );
   };
 
-  const handleCategoryAdd = (newCategoryData: Omit<TokenCategory, 'id' | 'tokens'>) => {
+  const handleCategoryAdd = (
+    newCategoryData: Omit<TokenCategory, 'id' | 'tokens'>
+  ) => {
     const newCategory: TokenCategory = {
       ...newCategoryData,
       id: `cat-${Date.now()}`,
       tokens: [],
     };
-    setCategories(prev => [...prev, newCategory]);
+    setCategories((prev) => [...prev, newCategory]);
   };
 
   const handleCategoryUpdate = (updatedCategory: TokenCategory) => {
-    setCategories(prev => prev.map(c => c.id === updatedCategory.id ? updatedCategory : c));
+    setCategories((prev) =>
+      prev.map((c) => (c.id === updatedCategory.id ? updatedCategory : c))
+    );
   };
 
   const handleCategoryDelete = (categoryId: string) => {
-    setCategories(prev => prev.filter(c => c.id !== categoryId));
+    setCategories((prev) => prev.filter((c) => c.id !== categoryId));
   };
 
   return (
     <TooltipProvider delayDuration={100}>
       <div className="p-4 space-y-4">
-        <h3 className="text-lg font-semibold font-headline text-primary" style={{ textShadow: '0 0 5px hsl(var(--primary))' }}>
+        <h3
+          className="text-lg font-semibold font-headline text-primary"
+          style={{ textShadow: '0 0 5px hsl(var(--primary))' }}
+        >
           Token Library
         </h3>
         <ScrollArea className="max-h-[400px] -mr-4 pr-4">
           <div className="space-y-2">
-            {categories.map(category => (
-               <IconCategory
+            {categories.map((category) => (
+              <IconCategory
                 key={category.id}
                 category={category}
                 onTokenUpdate={handleTokenUpdate}
@@ -311,12 +392,16 @@ export function IconLibrary() {
         </ScrollArea>
         <div>
           <Separator className="my-4" />
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="w-full"
             onClick={() => {
               setIsCreatingCategory(true);
-              setEditingCategory({ id: '', title: 'New Category', iconName: 'FolderPlus'});
+              setEditingCategory({
+                id: '',
+                title: 'New Category',
+                iconName: 'FolderPlus',
+              });
             }}
           >
             <FolderPlus className="mr-2 h-4 w-4" />
@@ -325,26 +410,26 @@ export function IconLibrary() {
         </div>
       </div>
 
-       {editingCategory && (
-         <CategoryEditDialog
-            category={editingCategory}
-            isCreating={isCreatingCategory}
-            onUpdate={(cat) => {
-              handleCategoryUpdate(cat);
-              setIsCreatingCategory(false);
-              setEditingCategory(null);
-            }}
-            onCreate={(catData) => {
-              handleCategoryAdd(catData)
-              setIsCreatingCategory(false);
-              setEditingCategory(null);
-            }}
-            onClose={() => {
-              setIsCreatingCategory(false);
-              setEditingCategory(null);
-            }}
-          />
-       )}
+      {editingCategory && (
+        <CategoryEditDialog
+          category={editingCategory}
+          isCreating={isCreatingCategory}
+          onUpdate={(cat) => {
+            handleCategoryUpdate(cat);
+            setIsCreatingCategory(false);
+            setEditingCategory(null);
+          }}
+          onCreate={(catData) => {
+            handleCategoryAdd(catData);
+            setIsCreatingCategory(false);
+            setEditingCategory(null);
+          }}
+          onClose={() => {
+            setIsCreatingCategory(false);
+            setEditingCategory(null);
+          }}
+        />
+      )}
     </TooltipProvider>
   );
 }
