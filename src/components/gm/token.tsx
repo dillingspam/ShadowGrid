@@ -80,7 +80,7 @@ export const Token: FC<TokenProps> = (props) => {
             onDragStart={onDragStart}
             onContextMenu={handleContextMenu}
             className={cn(
-              "absolute flex items-center justify-center transition-all duration-100 p-1",
+              "absolute flex items-center justify-center transition-all duration-100",
               !isPlayerView && "cursor-grab active:cursor-grabbing hover:scale-105 hover:z-10",
               isLargeToken ? 'rounded-lg' : 'rounded-full'
             )}
