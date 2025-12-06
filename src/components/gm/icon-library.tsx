@@ -30,10 +30,6 @@ import {
 } from '@/components/ui/popover';
 import { CategoryEditDialog } from './category-edit-dialog';
 import { Separator } from '../ui/separator';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
-import { cn } from '@/lib/utils';
-import { ChevronsUpDown } from 'lucide-react';
-
 
 export interface TemplateToken {
   id: string;
@@ -133,7 +129,7 @@ const DraggableToken = ({ token }: { token: TemplateToken }) => {
           onDragStart={onDragStart}
           className="flex aspect-square items-center justify-center rounded-lg bg-background hover:bg-secondary cursor-grab active:cursor-grabbing transition-all text-muted-foreground hover:text-accent hover:drop-shadow-[0_0_5px_hsl(var(--accent))]"
         >
-          <IconComponent className="h-8 w-8" />
+          <IconComponent className="h-3/4 w-3/4" />
         </div>
       </TooltipTrigger>
       <TooltipContent side="top">
@@ -160,7 +156,7 @@ const IconCategory = ({
 }) => {
   const [editingToken, setEditingToken] = useState<TemplateToken | null>(null);
   const [isCreatingToken, setIsCreatingToken] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
   const handleCreateToken = (newTokenData: Omit<TemplateToken, 'id'>) => {
     onTokenAdd(category.id, newTokenData);
@@ -171,7 +167,7 @@ const IconCategory = ({
   return (
     <>
       <div className="flex items-center">
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-full justify-start">
               <CategoryIcon className="w-4 h-4" />
@@ -276,7 +272,8 @@ const IconCategory = ({
         }}
         onCreate={(newToken) => {
           handleCreateToken(newToken);
-          setIsOpen(true);
+          setEditingToken(null);
+          setIsPopoverOpen(true);
         }}
         onClose={() => setEditingToken(null)}
       />
@@ -364,14 +361,14 @@ export function IconLibrary() {
 
   return (
     <TooltipProvider delayDuration={100}>
-      <div className="p-4 space-y-4">
+      <div className="p-4">
         <h3
-          className="text-lg font-semibold font-headline text-primary"
+          className="text-lg font-semibold font-headline text-primary mb-4"
           style={{ textShadow: '0 0 5px hsl(var(--primary))' }}
         >
           Token Library
         </h3>
-        <ScrollArea className="max-h-[400px] -mr-4 pr-4">
+        <ScrollArea className="max-h-[250px] -mr-4 pr-4">
           <div className="space-y-2">
             {categories.map((category) => (
               <IconCategory
