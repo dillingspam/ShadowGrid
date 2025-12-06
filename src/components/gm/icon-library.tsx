@@ -30,6 +30,10 @@ import {
 } from '@/components/ui/popover';
 import { CategoryEditDialog } from './category-edit-dialog';
 import { Separator } from '../ui/separator';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
+import { cn } from '@/lib/utils';
+import { ChevronsUpDown } from 'lucide-react';
+
 
 export interface TemplateToken {
   id: string;
@@ -129,9 +133,7 @@ const DraggableToken = ({ token }: { token: TemplateToken }) => {
           onDragStart={onDragStart}
           className="flex aspect-square items-center justify-center rounded-lg bg-background hover:bg-secondary cursor-grab active:cursor-grabbing transition-all text-muted-foreground hover:text-accent hover:drop-shadow-[0_0_5px_hsl(var(--accent))]"
         >
-          <div className="h-8 w-8">
-            <IconComponent />
-          </div>
+          <IconComponent className="h-8 w-8" />
         </div>
       </TooltipTrigger>
       <TooltipContent side="top">
@@ -158,6 +160,7 @@ const IconCategory = ({
 }) => {
   const [editingToken, setEditingToken] = useState<TemplateToken | null>(null);
   const [isCreatingToken, setIsCreatingToken] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   
   const handleCreateToken = (newTokenData: Omit<TemplateToken, 'id'>) => {
     onTokenAdd(category.id, newTokenData);
@@ -168,7 +171,7 @@ const IconCategory = ({
   return (
     <>
       <div className="flex items-center">
-        <Popover>
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" className="w-full justify-start">
               <CategoryIcon className="w-4 h-4" />
@@ -180,10 +183,10 @@ const IconCategory = ({
               {category.tokens.map((token) => (
                 <div key={token.id} className="relative group">
                   <DraggableToken token={token} />
-                  <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-0 right-0">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-6 w-6">
+                        <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100">
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -218,7 +221,7 @@ const IconCategory = ({
                         id: '',
                         name: 'New Preset',
                         iconName: 'HelpCircle',
-                        tokenType: category.id === 'cat-player' ? 'player' : category.id === 'cat-monster' ? 'monster' : 'item',
+                        tokenType: category.id.startsWith('cat-player') ? 'player' : category.id.startsWith('cat-monster') ? 'monster' : 'item',
                       });
                     }}
                     className="flex aspect-square items-center justify-center rounded-lg bg-transparent hover:bg-secondary cursor-pointer transition-all text-muted-foreground hover:text-primary"
@@ -271,7 +274,10 @@ const IconCategory = ({
           onTokenUpdate(category.id, updatedToken);
           setEditingToken(null);
         }}
-        onCreate={handleCreateToken}
+        onCreate={(newToken) => {
+          handleCreateToken(newToken);
+          setIsOpen(true);
+        }}
         onClose={() => setEditingToken(null)}
       />
     </>
@@ -408,7 +414,10 @@ export function IconLibrary() {
           category={editingCategory}
           isCreating={isCreatingCategory}
           onUpdate={(cat) => {
-            handleCategoryUpdate(cat);
+            const fullCategory = categories.find(c => c.id === cat.id)
+            if (fullCategory) {
+              handleCategoryUpdate({...fullCategory, ...cat});
+            }
             setIsCreatingCategory(false);
             setEditingCategory(null);
           }}
