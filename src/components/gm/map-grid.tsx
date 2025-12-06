@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, DragEvent, MouseEvent, FC } from 'react';
+import { useState, useRef, DragEvent, MouseEvent, FC, useMemo } from 'react';
 import { Token, GRID_CELL_SIZE } from './token';
 import type { TokenData } from './token';
 import { cn } from '@/lib/utils';
@@ -37,6 +37,19 @@ export const MapGrid: FC<MapGridProps> = ({
   const [fog, setFog] = useState(() => generateInitialFog(GRID_WIDTH, GRID_HEIGHT, isPlayerView));
   const gridRef = useRef<HTMLDivElement>(null);
   const fogInteractionState = useRef<'revealing' | 'hiding' | null>(null);
+
+  const visibleTokens = useMemo(() => {
+    if (!isPlayerView) {
+      return tokens;
+    }
+    return tokens.filter(token => {
+      // Basic check: is the token's origin point revealed?
+      // A more complex check could verify all squares occupied by a larger token.
+      const isVisible = fog[token.y]?.[token.x] === false;
+      return isVisible;
+    });
+  }, [tokens, fog, isPlayerView]);
+
 
   const onDragOver = (e: DragEvent) => {
     e.preventDefault();
@@ -160,7 +173,7 @@ export const MapGrid: FC<MapGridProps> = ({
       onMouseLeave={onMouseLeave}
       onContextMenu={onContextMenu}
       className={cn(
-        "relative w-full h-full min-h-[500px] bg-card border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10",
+        "relative bg-card border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10",
         !isPlayerView && isFogBrushActive && "cursor-crosshair"
       )}
       style={{
@@ -170,7 +183,7 @@ export const MapGrid: FC<MapGridProps> = ({
         maxHeight: '100%',
       }}
     >
-      <div className="absolute inset-0 z-[1]">
+       <div className="absolute inset-0 z-[1] pointer-events-none">
          {mapImage && (
           <Image 
             src={mapImage}
@@ -180,10 +193,10 @@ export const MapGrid: FC<MapGridProps> = ({
           />
         )}
       </div>
-      <div className="absolute inset-0 grid-bg z-[2]" />
+      <div className="absolute inset-0 grid-bg z-[2] pointer-events-none" />
       
       <div className="relative w-full h-full z-[3]">
-        {tokens.map(token => (
+        {visibleTokens.map(token => (
           <Token key={token.id} {...token} />
         ))}
       </div>
