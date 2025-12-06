@@ -21,7 +21,6 @@ import {
   ShoppingBag,
   MoreVertical,
 } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -106,14 +105,14 @@ const IconCategory = ({
 
   return (
     <>
-      <Popover>
-        <PopoverTrigger asChild>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
           <Button variant="outline" className="w-full justify-start">
             {icon}
             <span className="ml-2">{title}</span>
           </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-2" side="right" align="start">
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-auto p-2" side="right" align="start">
           <div className="grid grid-cols-4 gap-2">
             {tokens.map((token) => (
               <div key={token.id} className="relative group">
@@ -141,8 +140,8 @@ const IconCategory = ({
               </div>
             ))}
           </div>
-        </PopoverContent>
-      </Popover>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <IconEditDialog
         token={editingToken}
         onUpdate={(updatedToken) => {
