@@ -20,9 +20,10 @@ const GRID_HEIGHT = 25;
 interface MapGridProps {
   isPlayerView?: boolean;
   fogOpacity?: number;
+  isFogBrushActive?: boolean;
 }
 
-export const MapGrid: FC<MapGridProps> = ({ isPlayerView = false, fogOpacity = 80 }) => {
+export const MapGrid: FC<MapGridProps> = ({ isPlayerView = false, fogOpacity = 80, isFogBrushActive = false }) => {
   const [tokens, setTokens] = useState(initialTokens);
   const [fog, setFog] = useState(() => generateInitialFog(GRID_WIDTH, GRID_HEIGHT, isPlayerView));
   const gridRef = useRef<HTMLDivElement>(null);
@@ -78,7 +79,7 @@ export const MapGrid: FC<MapGridProps> = ({ isPlayerView = false, fogOpacity = 8
   };
 
   const onMouseDown = (e: MouseEvent<HTMLDivElement>) => {
-    if (isPlayerView) return;
+    if (isPlayerView || !isFogBrushActive) return;
     if (e.button === 0) { // Left-click
       fogInteractionState.current = 'revealing';
     } else if (e.button === 2) { // Right-click
@@ -88,7 +89,7 @@ export const MapGrid: FC<MapGridProps> = ({ isPlayerView = false, fogOpacity = 8
   };
 
   const onMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    if (!fogInteractionState.current) return;
+    if (!fogInteractionState.current || !isFogBrushActive) return;
     handleFogInteraction(e);
   };
   
@@ -118,7 +119,7 @@ export const MapGrid: FC<MapGridProps> = ({ isPlayerView = false, fogOpacity = 8
       onContextMenu={onContextMenu}
       className={cn(
         "relative w-full h-full min-h-[500px] bg-card border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10",
-        !isPlayerView && "cursor-crosshair"
+        !isPlayerView && isFogBrushActive && "cursor-crosshair"
       )}
       style={{
         width: `${GRID_WIDTH * GRID_CELL_SIZE}px`,

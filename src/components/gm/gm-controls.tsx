@@ -5,14 +5,22 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { Dices, ShieldQuestion } from 'lucide-react';
+import { Dices, ShieldQuestion, Brush } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface GmControlsProps {
   fogOpacity: number;
   onFogOpacityChange: (value: number) => void;
+  isFogBrushActive: boolean;
+  onFogBrushToggle: (active: boolean) => void;
 }
 
-export function GmControls({ fogOpacity, onFogOpacityChange }: GmControlsProps) {
+export function GmControls({ 
+  fogOpacity, 
+  onFogOpacityChange,
+  isFogBrushActive,
+  onFogBrushToggle
+}: GmControlsProps) {
   return (
     <div className="p-4">
       <Tabs defaultValue="environment" className="w-full">
@@ -22,6 +30,14 @@ export function GmControls({ fogOpacity, onFogOpacityChange }: GmControlsProps) 
           <TabsTrigger value="rolls">Rolls</TabsTrigger>
         </TabsList>
         <TabsContent value="environment" className="mt-6 space-y-6">
+           <Button 
+            variant={isFogBrushActive ? "secondary" : "outline"}
+            className={cn("w-full transition-all", isFogBrushActive && "shadow-inner shadow-accent/50 border-accent text-accent")}
+            onClick={() => onFogBrushToggle(!isFogBrushActive)}
+          >
+            <Brush className="mr-2 h-4 w-4" />
+            {isFogBrushActive ? 'Fog Brush Active' : 'Activate Fog Brush'}
+          </Button>
           <div className="space-y-3">
             <Label htmlFor="fog-opacity">Fog of War Opacity</Label>
             <Slider 
