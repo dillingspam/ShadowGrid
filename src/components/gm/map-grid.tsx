@@ -5,6 +5,7 @@ import { Token, GRID_CELL_SIZE } from './token';
 import type { TokenData } from './token';
 import { cn } from '@/lib/utils';
 import { FogOfWar, generateInitialFog } from './fog-of-war';
+import Image from 'next/image';
 
 const initialTokens: TokenData[] = [
   { id: 'player1', x: 3, y: 4, color: 'hsl(var(--accent))', icon: 'player', size: 1, name: 'Cyber-Ronin' },
@@ -22,13 +23,15 @@ interface MapGridProps {
   fogOpacity?: number;
   isFogBrushActive?: boolean;
   brushSize?: number;
+  mapImage?: string | null;
 }
 
 export const MapGrid: FC<MapGridProps> = ({ 
   isPlayerView = false, 
   fogOpacity = 80, 
   isFogBrushActive = false,
-  brushSize = 3 
+  brushSize = 3,
+  mapImage = null
 }) => {
   const [tokens, setTokens] = useState(initialTokens);
   const [fog, setFog] = useState(() => generateInitialFog(GRID_WIDTH, GRID_HEIGHT, isPlayerView));
@@ -79,8 +82,6 @@ export const MapGrid: FC<MapGridProps> = ({
         row.map((isFogged, x) => {
           const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
           if (distance <= radius) {
-            // If revealing, we want to turn fog off (isFogged = false)
-            // If hiding, we want to turn fog on (isFogged = true)
             const newFogState = !shouldReveal;
             if (isFogged !== newFogState) {
               hasChanged = true;
@@ -146,6 +147,15 @@ export const MapGrid: FC<MapGridProps> = ({
         maxHeight: '100%',
       }}
     >
+      {mapImage && (
+        <Image 
+          src={mapImage}
+          alt="Game Map"
+          layout="fill"
+          objectFit="cover"
+          className="absolute inset-0 z-0"
+        />
+      )}
       <div className="absolute inset-0 grid-bg" />
       <div className="relative w-full h-full">
         <FogOfWar fog={fog} isPlayerView={isPlayerView} fogOpacity={fogOpacity} />

@@ -10,6 +10,7 @@ export default function GMPage() {
   const [fogOpacity, setFogOpacity] = useState(80);
   const [isFogBrushActive, setIsFogBrushActive] = useState(false);
   const [brushSize, setBrushSize] = useState(3);
+  const [mapImage, setMapImage] = useState<string | null>(null);
   
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
@@ -20,6 +21,7 @@ export default function GMPage() {
             fogOpacity={fogOpacity} 
             isFogBrushActive={isFogBrushActive} 
             brushSize={brushSize}
+            mapImage={mapImage}
           />
         </main>
         <aside className="hidden md:flex flex-col bg-card border-l border-border">
@@ -33,6 +35,7 @@ export default function GMPage() {
               onFogBrushToggle={setIsFogBrushActive}
               brushSize={brushSize}
               onBrushSizeChange={setBrushSize}
+              onMapImageChange={setMapImage}
             />
           </div>
         </aside>

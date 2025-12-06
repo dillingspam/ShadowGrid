@@ -1,11 +1,11 @@
 'use client';
-
+import React, { useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { Dices, ShieldQuestion, Brush } from 'lucide-react';
+import { Dices, ShieldQuestion, Brush, Map, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface GmControlsProps {
@@ -15,6 +15,7 @@ interface GmControlsProps {
   onFogBrushToggle: (active: boolean) => void;
   brushSize: number;
   onBrushSizeChange: (value: number) => void;
+  onMapImageChange: (url: string | null) => void;
 }
 
 export function GmControls({ 
@@ -23,8 +24,34 @@ export function GmControls({
   isFogBrushActive,
   onFogBrushToggle,
   brushSize,
-  onBrushSizeChange
+  onBrushSizeChange,
+  onMapImageChange
 }: GmControlsProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        onMapImageChange(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleClearMap = () => {
+    onMapImageChange(null);
+    if(fileInputRef.current) {
+        fileInputRef.current.value = '';
+    }
+  };
+
+
   return (
     <div className="p-4">
       <Tabs defaultValue="environment" className="w-full">
@@ -70,6 +97,17 @@ export function GmControls({
            <div className="flex items-center justify-between">
             <Label htmlFor="player-vision" className="flex-grow">Player Vision Lines</Label>
             <Switch id="player-vision" />
+          </div>
+          <div className='space-y-2'>
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+            <Button variant="outline" className="w-full" onClick={handleImportClick}>
+              <Map className="mr-2 h-4 w-4" />
+              Import Map
+            </Button>
+            <Button variant="destructive" className="w-full" onClick={handleClearMap}>
+              <Trash2 className="mr-2 h-4 w-4" />
+              Clear Map
+            </Button>
           </div>
         </TabsContent>
         <TabsContent value="npcs" className="mt-6 text-center text-muted-foreground">
