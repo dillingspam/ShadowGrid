@@ -30,6 +30,8 @@ import {
 } from '@/components/ui/popover';
 import { CategoryEditDialog } from './category-edit-dialog';
 import { Separator } from '../ui/separator';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
+import { cn } from '@/lib/utils';
 
 export interface TemplateToken {
   id: string;
@@ -129,7 +131,7 @@ const DraggableToken = ({ token }: { token: TemplateToken }) => {
           onDragStart={onDragStart}
           className="flex aspect-square items-center justify-center rounded-lg bg-background hover:bg-secondary cursor-grab active:cursor-grabbing transition-all text-muted-foreground hover:text-accent hover:drop-shadow-[0_0_5px_hsl(var(--accent))]"
         >
-          <IconComponent className="h-3/4 w-3/4" />
+          <IconComponent className="w-3/4 h-3/4" />
         </div>
       </TooltipTrigger>
       <TooltipContent side="top">
@@ -156,7 +158,6 @@ const IconCategory = ({
 }) => {
   const [editingToken, setEditingToken] = useState<TemplateToken | null>(null);
   const [isCreatingToken, setIsCreatingToken] = useState(false);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
   const handleCreateToken = (newTokenData: Omit<TemplateToken, 'id'>) => {
     onTokenAdd(category.id, newTokenData);
@@ -166,15 +167,45 @@ const IconCategory = ({
 
   return (
     <>
-      <div className="flex items-center">
-        <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="w-full justify-start">
+      <Collapsible>
+        <div className="flex items-center">
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" className="w-full justify-start">
               <CategoryIcon className="w-4 h-4" />
               <span className="ml-2 flex-1 text-left">{category.title}</span>
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-80">
+          </CollapsibleTrigger>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 ml-1 shrink-0"
+              >
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem
+                onClick={() => {
+                  onCategoryUpdate(category);
+                }}
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Edit Category
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => onCategoryDelete(category.id)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Category
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <CollapsibleContent className="p-2">
             <div className="grid grid-cols-4 gap-4">
               {category.tokens.map((token) => (
                 <div key={token.id} className="relative group">
@@ -222,7 +253,7 @@ const IconCategory = ({
                     }}
                     className="flex aspect-square items-center justify-center rounded-lg bg-transparent hover:bg-secondary cursor-pointer transition-all text-muted-foreground hover:text-primary"
                   >
-                    <PlusCircle size={32} />
+                    <PlusCircle className="w-8 h-8" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="top">
@@ -230,38 +261,9 @@ const IconCategory = ({
                 </TooltipContent>
               </Tooltip>
             </div>
-          </PopoverContent>
-        </Popover>
+        </CollapsibleContent>
+      </Collapsible>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 ml-1 shrink-0"
-            >
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem
-              onClick={() => {
-                onCategoryUpdate(category);
-              }}
-            >
-              <Edit className="mr-2 h-4 w-4" />
-              Edit Category
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onCategoryDelete(category.id)}
-              className="text-destructive focus:text-destructive"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete Category
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
 
       <IconEditDialog
         token={editingToken}
@@ -273,7 +275,6 @@ const IconCategory = ({
         onCreate={(newToken) => {
           handleCreateToken(newToken);
           setEditingToken(null);
-          setIsPopoverOpen(true);
         }}
         onClose={() => setEditingToken(null)}
       />
@@ -379,7 +380,7 @@ export function IconLibrary() {
                 onTokenAdd={handleTokenAdd}
                 onCategoryUpdate={(cat) => {
                   setEditingCategory(cat);
-                  setIsCreatingCategory(false);
+setIsCreatingCategory(false);
                 }}
                 onCategoryDelete={handleCategoryDelete}
               />
