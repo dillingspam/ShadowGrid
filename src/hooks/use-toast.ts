@@ -1,3 +1,9 @@
+/**
+ * @file This file defines the `useToast` hook, a custom hook for managing and
+ * displaying toast notifications throughout the application. It is inspired by
+ * the react-hot-toast library.
+ */
+
 "use client"
 
 // Inspired by react-hot-toast library
@@ -8,9 +14,12 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_LIMIT = 1; // Max number of toasts to show at once.
+const TOAST_REMOVE_DELAY = 1000000; // A long delay before removing a toast from the DOM.
 
+/**
+ * The shape of a toast object managed by the toaster.
+ */
 type ToasterToast = ToastProps & {
   id: string
   title?: React.ReactNode
@@ -18,6 +27,9 @@ type ToasterToast = ToastProps & {
   action?: ToastActionElement
 }
 
+/**
+ * The action types for the toast reducer.
+ */
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
   UPDATE_TOAST: "UPDATE_TOAST",
@@ -25,8 +37,11 @@ const actionTypes = {
   REMOVE_TOAST: "REMOVE_TOAST",
 } as const
 
-let count = 0
+let count = 0;
 
+/**
+ * Generates a unique ID for each toast.
+ */
 function genId() {
   count = (count + 1) % Number.MAX_SAFE_INTEGER
   return count.toString()
@@ -34,6 +49,9 @@ function genId() {
 
 type ActionType = typeof actionTypes
 
+/**
+ * The possible actions that can be dispatched to the toast reducer.
+ */
 type Action =
   | {
       type: ActionType["ADD_TOAST"]
@@ -52,12 +70,16 @@ type Action =
       toastId?: ToasterToast["id"]
     }
 
+/**
+ * The state shape for the toast system.
+ */
 interface State {
   toasts: ToasterToast[]
 }
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
+// Schedules a toast for removal from the DOM after a delay.
 const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) {
     return
@@ -74,6 +96,12 @@ const addToRemoveQueue = (toastId: string) => {
   toastTimeouts.set(toastId, timeout)
 }
 
+/**
+ * The reducer function for managing toast state.
+ * @param {State} state The current state.
+ * @param {Action} action The action to process.
+ * @returns {State} The new state.
+ */
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_TOAST":
@@ -93,8 +121,7 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
+      // Side effect: schedule the toast for removal.
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
@@ -133,6 +160,10 @@ const listeners: Array<(state: State) => void> = []
 
 let memoryState: State = { toasts: [] }
 
+/**
+ * Dispatches an action to the reducer and notifies all listeners.
+ * @param {Action} action The action to dispatch.
+ */
 function dispatch(action: Action) {
   memoryState = reducer(memoryState, action)
   listeners.forEach((listener) => {
@@ -142,6 +173,11 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">
 
+/**
+ * A function to create and show a toast notification.
+ * @param {Toast} props The properties of the toast to show.
+ * @returns An object with `id`, `dismiss`, and `update` methods.
+ */
 function toast({ ...props }: Toast) {
   const id = genId()
 
@@ -171,6 +207,10 @@ function toast({ ...props }: Toast) {
   }
 }
 
+/**
+ * The `useToast` hook, which provides access to the toast state and functions.
+ * @returns The current toasts and functions to interact with them (`toast`, `dismiss`).
+ */
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 

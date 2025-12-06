@@ -1,6 +1,17 @@
+/**
+ * @file This file provides custom SVG icon components that are not available in the standard icon library.
+ */
+
 import { cn } from '@/lib/utils';
 import type { SVGProps } from 'react';
 
+/**
+ * A custom SVG icon representing a player or user.
+ * It accepts standard SVG props, allowing for flexible styling (e.g., className).
+ *
+ * @param {SVGProps<SVGSVGElement>} props The SVG props.
+ * @returns {JSX.Element} The rendered SVG icon.
+ */
 export function PlayerTokenIcon(props: SVGProps<SVGSVGElement>) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -10,6 +21,13 @@ export function PlayerTokenIcon(props: SVGProps<SVGSVGElement>) {
     );
 }
 
+/**
+ * A custom SVG icon representing a generic monster.
+ * It accepts standard SVG props, allowing for flexible styling.
+ *
+ * @param {SVGProps<SVGSVGElement>} props The SVG props.
+ * @returns {JSX.Element} The rendered SVG icon.
+ */
 export function MonsterTokenIcon(props: SVGProps<SVGSVGElement>) {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>

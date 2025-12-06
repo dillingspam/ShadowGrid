@@ -1,3 +1,8 @@
+/**
+ * @file This file defines a dialog component for creating and editing token categories.
+ * It allows the user to change a category's name and select a new icon.
+ */
+
 'use client';
 import { useState, useEffect } from 'react';
 import {
@@ -22,22 +27,38 @@ import {
   TooltipTrigger,
 } from '../ui/tooltip';
 
+/**
+ * Props for the CategoryEditDialog component.
+ */
 interface CategoryEditDialogProps {
+  /** The category object to edit. If null, the dialog is closed. If `isCreating` is true, this is a template. */
   category: Omit<TokenCategory, 'tokens'> | null;
+  /** True if creating a new category, false if editing an existing one. */
   isCreating: boolean;
+  /** Callback function when an existing category is updated. */
   onUpdate: (updatedCategory: TokenCategory) => void;
+  /** Callback function when a new category is created. */
   onCreate: (newCategory: Omit<TokenCategory, 'id' | 'tokens'>) => void;
+  /** Callback function to close the dialog. */
   onClose: () => void;
 }
 
+// Get the list of available icons from the iconMap, excluding the default icon.
 const availableIcons = Object.keys(iconMap).filter(
   (key) => key !== 'default'
 );
 
+/**
+ * A dialog for creating or editing a token category's properties.
+ *
+ * @param {CategoryEditDialogProps} props The component props.
+ * @returns {JSX.Element | null} The rendered dialog or null if not open.
+ */
 export function CategoryEditDialog({ category, isCreating, onUpdate, onCreate, onClose }: CategoryEditDialogProps) {
   const [title, setTitle] = useState('');
   const [iconName, setIconName] = useState('');
 
+  // Effect to populate the dialog's state when the category prop changes.
   useEffect(() => {
     if (category) {
       setTitle(isCreating ? 'New Category' : category.title);
@@ -49,13 +70,13 @@ export function CategoryEditDialog({ category, isCreating, onUpdate, onCreate, o
     return null;
   }
 
+  // Handles the save action for both creating and updating.
   const handleSave = () => {
     if (isCreating) {
       onCreate({ title, iconName });
     } else {
-      // We need to pass the tokens back, even though we don't edit them here.
-      // This is a bit of a hack because the dialog doesn't know about the tokens.
-      // A better implementation might involve a more complex state management.
+      // For updates, we need to merge the changes with the existing category data.
+      // This implementation detail is due to the dialog only managing a subset of category properties.
       const updatedCategory = { ...(category as TokenCategory), title, iconName };
       onUpdate(updatedCategory);
     }
@@ -72,6 +93,7 @@ export function CategoryEditDialog({ category, isCreating, onUpdate, onCreate, o
           <DialogTitle>{dialogTitle}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-6 py-4">
+          {/* Input for the category name */}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="name" className="text-right">
               Name
@@ -83,6 +105,7 @@ export function CategoryEditDialog({ category, isCreating, onUpdate, onCreate, o
               className="col-span-3"
             />
           </div>
+          {/* Scrollable grid for selecting an icon */}
           <div className="grid grid-cols-4 items-start gap-4">
             <Label className="text-right pt-2">Icon</Label>
             <div className="col-span-3">

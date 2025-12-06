@@ -1,3 +1,9 @@
+/**
+ * @file This file defines the IconLibrary component, which serves as a repository
+ * for token presets. It allows the GM to manage categories and token templates,
+ * and to drag-and-drop new tokens onto the map.
+ */
+
 'use client';
 import React, { useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -23,23 +29,24 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { CategoryEditDialog } from './category-edit-dialog';
 import { Separator } from '../ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import { cn } from '@/lib/utils';
 
+/**
+ * Interface for a single token template/preset in the library.
+ */
 export interface TemplateToken {
   id: string;
   name: string;
-  tokenType: string;
+  tokenType: string; // e.g., 'player', 'monster', 'item'
   iconName: string;
 }
 
+/**
+ * Interface for a category of token templates.
+ */
 export interface TokenCategory {
   id: string;
   title: string;
@@ -47,24 +54,15 @@ export interface TokenCategory {
   tokens: TemplateToken[];
 }
 
+// Initial data for the token library. This serves as the default set of categories and presets.
 const initialCategories: TokenCategory[] = [
   {
     id: 'cat-player',
     title: 'Players & NPCs',
     iconName: 'Users',
     tokens: [
-      {
-        id: 'player-template-1',
-        name: 'Player',
-        tokenType: 'player',
-        iconName: 'Shield',
-      },
-      {
-        id: 'player-template-2',
-        name: 'Guardian',
-        tokenType: 'player',
-        iconName: 'Shield',
-      },
+      { id: 'player-template-1', name: 'Player', tokenType: 'player', iconName: 'Shield' },
+      { id: 'player-template-2', name: 'Guardian', tokenType: 'player', iconName: 'Shield' },
     ],
   },
   {
@@ -72,30 +70,10 @@ const initialCategories: TokenCategory[] = [
     title: 'Monsters',
     iconName: 'VenetianMask',
     tokens: [
-      {
-        id: 'monster-template-1',
-        name: 'Undead',
-        tokenType: 'monster',
-        iconName: 'Skull',
-      },
-      {
-        id: 'monster-template-2',
-        name: 'Spirit',
-        tokenType: 'monster',
-        iconName: 'Ghost',
-      },
-      {
-        id: 'monster-template-3',
-        name: 'Beast',
-        tokenType: 'monster',
-        iconName: 'Flame',
-      },
-      {
-        id: 'monster-template-4',
-        name: 'Melee',
-        tokenType: 'monster',
-        iconName: 'Swords',
-      },
+      { id: 'monster-template-1', name: 'Undead', tokenType: 'monster', iconName: 'Skull' },
+      { id: 'monster-template-2', name: 'Spirit', tokenType: 'monster', iconName: 'Ghost' },
+      { id: 'monster-template-3', name: 'Beast', tokenType: 'monster', iconName: 'Flame' },
+      { id: 'monster-template-4', name: 'Melee', tokenType: 'monster', iconName: 'Swords' },
     ],
   },
   {
@@ -109,7 +87,13 @@ const initialCategories: TokenCategory[] = [
   },
 ];
 
+/**
+ * A draggable token preset from the library.
+ * @param {{ token: TemplateToken }} props The component props.
+ * @returns {JSX.Element} A draggable div containing the token icon.
+ */
 const DraggableToken = ({ token }: { token: TemplateToken }) => {
+  // Sets the data to be transferred during a drag-and-drop operation.
   const onDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     const dragData = {
       type: 'new-token',
@@ -141,6 +125,11 @@ const DraggableToken = ({ token }: { token: TemplateToken }) => {
   );
 };
 
+/**
+ * A collapsible component representing a single category in the token library.
+ * @param {object} props The component props.
+ * @returns {JSX.Element} A collapsible section for a category.
+ */
 const IconCategory = ({
   category,
   onTokenUpdate,
@@ -176,29 +165,19 @@ const IconCategory = ({
             </Button>
           </CollapsibleTrigger>
 
+          {/* Dropdown menu for editing or deleting the category itself */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 ml-1 shrink-0"
-              >
+              <Button variant="ghost" size="icon" className="h-9 w-9 ml-1 shrink-0">
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem
-                onClick={() => {
-                  onCategoryUpdate(category);
-                }}
-              >
+              <DropdownMenuItem onClick={() => onCategoryUpdate(category)}>
                 <Edit className="mr-2 h-4 w-4" />
                 Edit Category
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => onCategoryDelete(category.id)}
-                className="text-destructive focus:text-destructive"
-              >
+              <DropdownMenuItem onClick={() => onCategoryDelete(category.id)} className="text-destructive focus:text-destructive">
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete Category
               </DropdownMenuItem>
@@ -207,9 +186,11 @@ const IconCategory = ({
         </div>
         <CollapsibleContent className="p-2">
             <div className="grid grid-cols-4 gap-4">
+              {/* Renders each token preset within the category */}
               {category.tokens.map((token) => (
                 <div key={token.id} className="relative group">
                   <DraggableToken token={token} />
+                  {/* Dropdown for editing or deleting a specific token preset */}
                   <div className="absolute top-0 right-0">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -218,19 +199,11 @@ const IconCategory = ({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setIsCreatingToken(false);
-                            setEditingToken(token);
-                          }}
-                        >
+                        <DropdownMenuItem onClick={() => { setIsCreatingToken(false); setEditingToken(token); }}>
                           <Edit className="mr-2 h-4 w-4" />
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => onTokenDelete(category.id, token.id)}
-                          className="text-destructive focus:text-destructive"
-                        >
+                        <DropdownMenuItem onClick={() => onTokenDelete(category.id, token.id)} className="text-destructive focus:text-destructive">
                           <Trash2 className="mr-2 h-4 w-4" />
                           Delete
                         </DropdownMenuItem>
@@ -239,6 +212,7 @@ const IconCategory = ({
                   </div>
                 </div>
               ))}
+              {/* Button to add a new preset to this category */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
@@ -264,7 +238,7 @@ const IconCategory = ({
         </CollapsibleContent>
       </Collapsible>
 
-
+      {/* Dialog for editing or creating a token preset */}
       <IconEditDialog
         token={editingToken}
         isCreating={isCreatingToken}
@@ -282,33 +256,29 @@ const IconCategory = ({
   );
 };
 
+/**
+ * The main component for the token library sidebar.
+ * It manages the state for all categories and their presets.
+ *
+ * @returns {JSX.Element} The rendered token library panel.
+ */
 export function IconLibrary() {
-  const [categories, setCategories] =
-    useState<TokenCategory[]>(initialCategories);
-  const [
-    editingCategory,
-    setEditingCategory,
-  ] = useState<Omit<TokenCategory, 'tokens'> | null>(null);
+  const [categories, setCategories] = useState<TokenCategory[]>(initialCategories);
+  const [editingCategory, setEditingCategory] = useState<Omit<TokenCategory, 'tokens'> | null>(null);
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
 
-  const handleTokenUpdate = (
-    categoryId: string,
-    updatedToken: TemplateToken
-  ) => {
+  // Handler to update a specific token preset within a category.
+  const handleTokenUpdate = (categoryId: string, updatedToken: TemplateToken) => {
     setCategories((prev) =>
       prev.map((cat) =>
         cat.id === categoryId
-          ? {
-              ...cat,
-              tokens: cat.tokens.map((t) =>
-                t.id === updatedToken.id ? updatedToken : t
-              ),
-            }
+          ? { ...cat, tokens: cat.tokens.map((t) => (t.id === updatedToken.id ? updatedToken : t)) }
           : cat
       )
     );
   };
 
+  // Handler to delete a specific token preset from a category.
   const handleTokenDelete = (categoryId: string, tokenId: string) => {
     setCategories((prev) =>
       prev.map((cat) =>
@@ -319,27 +289,21 @@ export function IconLibrary() {
     );
   };
 
-  const handleTokenAdd = (
-    categoryId: string,
-    newTokenData: Omit<TemplateToken, 'id'>
-  ) => {
+  // Handler to add a new token preset to a category.
+  const handleTokenAdd = (categoryId: string, newTokenData: Omit<TemplateToken, 'id'>) => {
     setCategories((prev) =>
       prev.map((cat) => {
         if (cat.id === categoryId) {
           const newId = `template-${newTokenData.tokenType}-${Date.now()}`;
-          return {
-            ...cat,
-            tokens: [...cat.tokens, { ...newTokenData, id: newId }],
-          };
+          return { ...cat, tokens: [...cat.tokens, { ...newTokenData, id: newId }] };
         }
         return cat;
       })
     );
   };
 
-  const handleCategoryAdd = (
-    newCategoryData: Omit<TokenCategory, 'id' | 'tokens'>
-  ) => {
+  // Handler to add a new category.
+  const handleCategoryAdd = (newCategoryData: Omit<TokenCategory, 'id' | 'tokens'>) => {
     const newCategory: TokenCategory = {
       ...newCategoryData,
       id: `cat-${Date.now()}`,
@@ -348,6 +312,7 @@ export function IconLibrary() {
     setCategories((prev) => [...prev, newCategory]);
   };
 
+  // Handler to update an existing category's properties (name, icon).
   const handleCategoryUpdate = (updatedCategory: TokenCategory) => {
     setCategories((prev) =>
       prev.map((c) => (c.id === updatedCategory.id ? updatedCategory : c))
@@ -356,6 +321,7 @@ export function IconLibrary() {
     setIsCreatingCategory(false);
   };
 
+  // Handler to delete an entire category.
   const handleCategoryDelete = (categoryId: string) => {
     setCategories((prev) => prev.filter((c) => c.id !== categoryId));
   };
@@ -380,7 +346,7 @@ export function IconLibrary() {
                 onTokenAdd={handleTokenAdd}
                 onCategoryUpdate={(cat) => {
                   setEditingCategory(cat);
-setIsCreatingCategory(false);
+                  setIsCreatingCategory(false);
                 }}
                 onCategoryDelete={handleCategoryDelete}
               />
@@ -407,12 +373,13 @@ setIsCreatingCategory(false);
         </div>
       </div>
 
+      {/* Dialog for editing or creating a category */}
       {editingCategory && (
         <CategoryEditDialog
           category={editingCategory}
           isCreating={isCreatingCategory}
           onUpdate={(cat) => {
-            const fullCategory = categories.find(c => c.id === cat.id)
+            const fullCategory = categories.find(c => c.id === cat.id);
             if (fullCategory) {
               handleCategoryUpdate({...fullCategory, ...cat});
             }

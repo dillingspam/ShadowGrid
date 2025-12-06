@@ -1,3 +1,9 @@
+/**
+ * @file This file is the configuration for Tailwind CSS.
+ * It defines the application's color palette, fonts, custom animations,
+ * and other design system values.
+ */
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -9,11 +15,13 @@ export default {
   ],
   theme: {
     extend: {
+      // Defines custom font families.
       fontFamily: {
         body: ['"Space Grotesk"', 'sans-serif'],
         headline: ['"Space Grotesk"', 'sans-serif'],
         code: ['monospace'],
       },
+      // Defines the application's color palette using CSS variables from globals.css.
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
@@ -66,11 +74,13 @@ export default {
           ring: 'hsl(var(--sidebar-ring))',
         },
       },
+      // Defines border radius values using CSS variables.
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      // Defines custom CSS keyframe animations.
       keyframes: {
         'accordion-down': {
           from: {
@@ -93,6 +103,7 @@ export default {
           '50%': { filter: 'drop-shadow(0 0 8px hsl(var(--primary)))' }
         },
       },
+      // Makes the custom keyframes available as animation utility classes.
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',

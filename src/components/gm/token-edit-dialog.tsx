@@ -1,3 +1,8 @@
+/**
+ * @file This file defines a dialog component for editing the properties of an individual token
+ * that has been placed on the map grid.
+ */
+
 'use client';
 import { useState, useEffect } from 'react';
 import {
@@ -21,13 +26,21 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+/**
+ * Props for the TokenEditDialog component.
+ */
 interface TokenEditDialogProps {
+  /** The token data to be edited. If null, the dialog is not shown. */
   token: TokenData | null;
+  /** Callback function to update the token's data. */
   onUpdate: (updatedToken: TokenData) => void;
+  /** Callback function to delete the token. */
   onDelete: (tokenId: string) => void;
+  /** Callback function to close the dialog. */
   onClose: () => void;
 }
 
+// Pre-defined color options for tokens.
 const colors = [
   { name: 'Accent', value: 'hsl(var(--accent))' },
   { name: 'Destructive', value: 'hsl(var(--destructive))' },
@@ -37,6 +50,12 @@ const colors = [
   { name: 'Item Purple', value: 'hsl(277, 79%, 31%)' },
 ];
 
+/**
+ * A dialog for editing a token's properties, such as its name, size, and color.
+ *
+ * @param {TokenEditDialogProps} props The component props.
+ * @returns {JSX.Element | null} The rendered dialog or null if not open.
+ */
 export function TokenEditDialog({
   token,
   onUpdate,
@@ -47,6 +66,7 @@ export function TokenEditDialog({
   const [size, setSize] = useState(1);
   const [color, setColor] = useState('');
 
+  // Effect to populate the dialog's state when the token prop changes.
   useEffect(() => {
     if (token) {
       setName(token.name);
@@ -55,15 +75,18 @@ export function TokenEditDialog({
     }
   }, [token]);
 
+  // If no token is provided, don't render the dialog.
   if (!token) {
     return null;
   }
 
+  // Calls the onUpdate callback with the modified token data.
   const handleSave = () => {
     onUpdate({ ...token, name, size, color });
     onClose();
   };
 
+  // Calls the onDelete callback.
   const handleDelete = () => {
     onDelete(token.id);
     onClose();
@@ -76,6 +99,7 @@ export function TokenEditDialog({
           <DialogTitle>Edit Token: {token.name}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
+          {/* Input for token name */}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="name" className="text-right">
               Name
@@ -87,6 +111,7 @@ export function TokenEditDialog({
               className="col-span-3"
             />
           </div>
+          {/* Slider for token size */}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="size" className="text-right">
               Size
@@ -103,6 +128,7 @@ export function TokenEditDialog({
               <span className="w-8 text-center font-mono">{size}</span>
             </div>
           </div>
+          {/* Select dropdown for token color */}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="color" className="text-right">
               Color

@@ -1,14 +1,26 @@
+/**
+ * @file This file contains the configuration for the Next.js application.
+ * It includes settings for TypeScript, ESLint, image optimization, and experimental features.
+ */
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // TypeScript settings
   typescript: {
+    // Ignores build errors. Useful for rapid prototyping, but should be
+    // disabled for production builds to ensure type safety.
     ignoreBuildErrors: true,
   },
+  // ESLint settings
   eslint: {
+    // Ignores ESLint errors during builds.
     ignoreDuringBuilds: true,
   },
+  // Image optimization settings
   images: {
+    // Defines a list of allowed hostnames for optimized images using next/image.
+    // This prevents malicious users from using your optimization service for external images.
     remotePatterns: [
       {
         protocol: 'https',
@@ -31,11 +43,11 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    // allowedDevOrigins is now a top-level property in Next.js 14+
-    // but this project seems to be on a version that requires it here.
-    // If errors persist, we may need to move it.
-    // For now, let's keep it here as per previous attempts.
+    // This section is for experimental Next.js features.
+    // The properties here may change between Next.js versions.
   },
+  // Security setting to allow connections from specific origins during development.
+  // This is necessary for environments like Google Cloud Workstations and Firebase Studio.
   allowedDevOrigins: [
     'https://*.cloudworkstations.dev',
     'https://*.firebase.studio',

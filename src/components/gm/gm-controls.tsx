@@ -1,3 +1,8 @@
+/**
+ * @file This file defines the GmControls component, which provides the GM with
+ * tools to manage the map, fog of war, and other game aspects from the sidebar.
+ */
+
 'use client';
 import React, { useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,16 +13,33 @@ import { Button } from '@/components/ui/button';
 import { Dices, ShieldQuestion, Brush, Map, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+/**
+ * Props for the GmControls component.
+ */
 interface GmControlsProps {
+  /** The current opacity of the fog of war (0-100). */
   fogOpacity: number;
+  /** Callback to update the fog opacity. */
   onFogOpacityChange: (value: number) => void;
+  /** Whether the fog brush tool is currently active. */
   isFogBrushActive: boolean;
+  /** Callback to toggle the fog brush tool. */
   onFogBrushToggle: (active: boolean) => void;
+  /** The current size of the fog brush. */
   brushSize: number;
+  /** Callback to update the brush size. */
   onBrushSizeChange: (value: number) => void;
+  /** Callback to update the map image with a new data URL. */
   onMapImageChange: (url: string | null) => void;
 }
 
+/**
+ * A component that houses various controls for the Game Master.
+ * It includes tabs for managing the map environment, NPCs, and dice rolls.
+ *
+ * @param {GmControlsProps} props The component props.
+ * @returns {JSX.Element} The rendered GM controls panel.
+ */
 export function GmControls({ 
   fogOpacity, 
   onFogOpacityChange,
@@ -27,23 +49,28 @@ export function GmControls({
   onBrushSizeChange,
   onMapImageChange
 }: GmControlsProps) {
+  // Ref to the hidden file input element for importing map images.
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Handles the file selection from the input.
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
+        // Once the file is read, its data URL is passed up to the parent.
         onMapImageChange(e.target?.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
+  // Programmatically clicks the hidden file input.
   const handleImportClick = () => {
     fileInputRef.current?.click();
   };
 
+  // Clears the current map image and resets the file input.
   const handleClearMap = () => {
     onMapImageChange(null);
     if(fileInputRef.current) {
@@ -60,6 +87,8 @@ export function GmControls({
           <TabsTrigger value="npcs">NPCs</TabsTrigger>
           <TabsTrigger value="rolls">Rolls</TabsTrigger>
         </TabsList>
+        
+        {/* Environment Tab Content */}
         <TabsContent value="environment" className="mt-6 space-y-6">
            <Button 
             variant={isFogBrushActive ? "secondary" : "outline"}
@@ -110,9 +139,13 @@ export function GmControls({
             </Button>
           </div>
         </TabsContent>
+        
+        {/* NPCs Tab Content (Placeholder) */}
         <TabsContent value="npcs" className="mt-6 text-center text-muted-foreground">
           <p className="text-sm">NPC management coming soon.</p>
         </TabsContent>
+
+        {/* Rolls Tab Content (Placeholder) */}
         <TabsContent value="rolls" className="mt-6 space-y-4">
           <p className="text-sm text-muted-foreground text-center mb-4">Make a secret roll.</p>
           <div className="flex flex-col gap-2">

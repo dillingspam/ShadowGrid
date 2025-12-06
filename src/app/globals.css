@@ -1,8 +1,16 @@
+/**
+ * This file contains the global styles for the application, including Tailwind CSS directives,
+ * CSS variable definitions for theming (light and dark mode), and base styles.
+ */
+
+/* Import Tailwind's base, components, and utilities styles. */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Define CSS variables for theming in the base layer. */
 @layer base {
+  /* Light theme variables */
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
@@ -35,6 +43,7 @@
     --radius: 0.5rem;
   }
  
+  /* Dark theme variables */
   .dark {
     --background: 0 0% 13%;
     --foreground: 0 0% 98%;
@@ -66,17 +75,22 @@
   }
 }
  
+/* Apply base styles to elements. */
 @layer base {
   * {
+    /* Apply the border color variable to all elements by default. */
     @apply border-border;
   }
   body {
+    /* Apply background and foreground colors to the body. */
     @apply bg-background text-foreground;
   }
 }
 
+/* Define custom utility classes. */
 @layer utilities {
   .grid-bg {
+    /* A custom utility to create a grid background pattern. */
     background-image:
       linear-gradient(hsl(var(--border)) 1px, transparent 1px),
       linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px);
