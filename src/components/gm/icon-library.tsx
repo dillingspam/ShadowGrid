@@ -8,9 +8,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
-  Users,
-  VenetianMask,
-  ShoppingBag,
   Edit,
   Trash2,
   MoreVertical,
@@ -25,7 +22,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CategoryEditDialog } from './category-edit-dialog';
@@ -228,20 +224,22 @@ const IconCategory = ({
         onClose={() => setEditingToken(null)}
       />
 
-      <CategoryEditDialog
-        category={editingCategory}
-        isCreating={false}
-        onUpdate={onCategoryUpdate}
-        onClose={() => setEditingCategory(null)}
-        onCreate={() => {}}
-      />
+      {editingCategory && !isCreating && (
+        <CategoryEditDialog
+          category={editingCategory}
+          isCreating={false}
+          onUpdate={onCategoryUpdate}
+          onClose={() => setEditingCategory(null)}
+          onCreate={() => {}}
+        />
+      )}
     </>
   );
 };
 
 export function IconLibrary() {
   const [categories, setCategories] = useState<TokenCategory[]>(initialCategories);
-  const [editingCategory, setEditingCategory] = useState<TokenCategory | null>(null);
+  const [editingCategory, setEditingCategory] = useState<Omit<TokenCategory, 'tokens'> | null>(null);
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
 
   const handleTokenUpdate = (categoryId: string, updatedToken: TemplateToken) => {
@@ -289,11 +287,11 @@ export function IconLibrary() {
 
   return (
     <TooltipProvider delayDuration={100}>
-      <div className="p-4 flex flex-col h-full">
+      <div className="p-4">
         <h3 className="text-lg font-semibold mb-4 font-headline text-primary" style={{ textShadow: '0 0 5px hsl(var(--primary))' }}>
           Token Library
         </h3>
-        <ScrollArea className="flex-1 -mr-4 pr-4">
+        <ScrollArea className="h-[300px] -mr-4 pr-4">
           <div className="space-y-2">
             {categories.map(category => (
                <IconCategory
@@ -314,7 +312,7 @@ export function IconLibrary() {
           className="w-full"
           onClick={() => {
             setIsCreatingCategory(true);
-            setEditingCategory({ id: '', title: 'New Category', iconName: 'FolderPlus', tokens: []});
+            setEditingCategory({ id: '', title: 'New Category', iconName: 'FolderPlus'});
           }}
         >
           <FolderPlus className="mr-2 h-4 w-4" />
@@ -322,23 +320,22 @@ export function IconLibrary() {
         </Button>
       </div>
 
-       <CategoryEditDialog
-        category={editingCategory}
-        isCreating={isCreatingCategory}
-        onUpdate={(cat) => {
-          handleCategoryUpdate(cat);
-          setEditingCategory(null);
-        }}
-        onCreate={(catData) => {
-          handleCategoryAdd(catData)
-          setIsCreatingCategory(false);
-          setEditingCategory(null);
-        }}
-        onClose={() => {
-          setIsCreatingCategory(false);
-          setEditingCategory(null);
-        }}
-      />
+       {editingCategory && isCreatingCategory && (
+         <CategoryEditDialog
+            category={editingCategory}
+            isCreating={isCreatingCategory}
+            onUpdate={() => {}}
+            onCreate={(catData) => {
+              handleCategoryAdd(catData)
+              setIsCreatingCategory(false);
+              setEditingCategory(null);
+            }}
+            onClose={() => {
+              setIsCreatingCategory(false);
+              setEditingCategory(null);
+            }}
+          />
+       )}
     </TooltipProvider>
   );
 }
