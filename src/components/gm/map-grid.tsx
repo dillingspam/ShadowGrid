@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, DragEvent } from 'react';
 import type { FC } from 'react';
-import { Token } from './token';
+import { Token, GRID_CELL_SIZE } from './token';
 import type { TokenData } from './token';
 
 const initialTokens: TokenData[] = [
@@ -19,10 +19,45 @@ interface MapGridProps {
 
 export const MapGrid: FC<MapGridProps> = ({ isPlayerView = false }) => {
   const [tokens, setTokens] = useState(initialTokens);
+  const gridRef = useRef<HTMLDivElement>(null);
   // In a real app, this state would be managed globally (e.g., Zustand, Jotai) and synced with a backend.
 
+  const onDragOver = (e: DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const onDrop = (e: DragEvent) => {
+    e.preventDefault();
+
+    if (isPlayerView) return;
+    if (!gridRef.current) return;
+    
+    const tokenId = e.dataTransfer.getData("application/reactflow");
+    const token = tokens.find((t) => t.id === tokenId);
+    if (!token) return;
+
+    const gridBounds = gridRef.current.getBoundingClientRect();
+    const x = e.clientX - gridBounds.left;
+    const y = e.clientY - gridBounds.top;
+
+    const newX = Math.floor(x / GRID_CELL_SIZE);
+    const newY = Math.floor(y / GRID_CELL_SIZE);
+
+    setTokens((prevTokens) =>
+      prevTokens.map((t) =>
+        t.id === tokenId ? { ...t, x: newX, y: newY } : t
+      )
+    );
+  };
+
+
   return (
-    <div className="relative w-full h-full min-h-[500px] bg-card border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10">
+    <div 
+      ref={gridRef}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      className="relative w-full h-full min-h-[500px] bg-card border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10">
       <div className="absolute inset-0 grid-bg" />
       <div className="relative w-full h-full">
         {tokens.map(token => (

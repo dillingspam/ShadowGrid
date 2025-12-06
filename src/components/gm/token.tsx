@@ -4,7 +4,7 @@ import { PlayerTokenIcon, MonsterTokenIcon } from '@/components/icons';
 import { Shield, HelpCircle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-const GRID_CELL_SIZE = 40; // in px
+export const GRID_CELL_SIZE = 40; // in px
 
 export interface TokenData {
   id: string;
@@ -16,7 +16,7 @@ export interface TokenData {
   name: string;
 }
 
-export const Token: FC<TokenData> = ({ x, y, color, icon, size, name }) => {
+export const Token: FC<TokenData> = ({ id, x, y, color, icon, size, name }) => {
   const IconComponent = () => {
     switch (icon) {
       case 'player': return <PlayerTokenIcon className="w-full h-full" />;
@@ -24,6 +24,11 @@ export const Token: FC<TokenData> = ({ x, y, color, icon, size, name }) => {
       case 'item': return <Shield className="w-3/4 h-3/4" />;
       default: return <HelpCircle className="w-full h-full" />;
     }
+  };
+
+  const onDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    e.dataTransfer.setData("application/reactflow", id);
+    e.dataTransfer.effectAllowed = 'move';
   };
 
   const tokenStyle: React.CSSProperties = {
@@ -44,6 +49,8 @@ export const Token: FC<TokenData> = ({ x, y, color, icon, size, name }) => {
       <Tooltip>
         <TooltipTrigger asChild>
           <div
+            draggable
+            onDragStart={onDragStart}
             className={cn(
               "absolute flex items-center justify-center cursor-grab active:cursor-grabbing transition-all duration-100 hover:scale-105 hover:z-10",
               isLargeToken ? 'rounded-lg' : 'rounded-full'
