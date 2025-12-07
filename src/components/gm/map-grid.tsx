@@ -321,8 +321,6 @@ export const MapGrid: FC<MapGridProps> = ({
         style={{
           width: `${GRID_WIDTH * GRID_CELL_SIZE}px`,
           height: `${GRID_HEIGHT * GRID_CELL_SIZE}px`,
-          maxWidth: '100%',
-          maxHeight: '100%',
         }}
       >
         <div 
