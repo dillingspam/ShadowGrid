@@ -348,7 +348,7 @@ export const MapGrid: FC<MapGridProps> = ({
         onContextMenu={onGridContextMenu}
         onWheel={handleWheel}
         className={cn(
-          "relative bg-card border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10",
+          "relative bg-transparent border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10",
           !isPlayerView && isFogBrushActive && "cursor-crosshair",
            !isPlayerView && !isPanning && !isFogBrushActive && "cursor-grab"
         )}
@@ -360,17 +360,14 @@ export const MapGrid: FC<MapGridProps> = ({
         {/* Layer 1: Static Grid Lines. This is always visible and doesn't transform. */}
         {isGridVisible && (
             <div 
-                className="absolute inset-0 grid-bg z-[1] pointer-events-none"
-                style={{
-                    backgroundSize: `${GRID_CELL_SIZE * scale}px ${GRID_CELL_SIZE * scale}px`,
-                    backgroundPosition: `${viewPosition.x}px ${viewPosition.y}px`,
-                }}
+                className="absolute inset-0 grid-bg z-[4] pointer-events-none"
             />
         )}
 
+        {/* This container holds all transformable elements (map, tokens) */}
         <div 
             ref={transformContainerRef}
-            className="absolute"
+            className="absolute top-0 left-0"
             style={{
                 width: `${containerWidth}px`,
                 height: `${containerHeight}px`,
@@ -379,7 +376,7 @@ export const MapGrid: FC<MapGridProps> = ({
             }}
         >
             {/* Layer 2: Map Image */}
-            <div className="absolute inset-0 z-[2] pointer-events-none">
+            <div className="absolute inset-0 z-[1] pointer-events-none">
             {mapImage && (
                 <Image 
                 src={mapImage}
@@ -397,7 +394,7 @@ export const MapGrid: FC<MapGridProps> = ({
             ))}
             </div>
             
-            {/* Layer 4: Fog of War */}
+            {/* Layer 5: Fog of War */}
             <FogOfWar fog={fog} isPlayerView={isPlayerView} fogOpacity={fogOpacity!} />
         </div>
 
@@ -405,7 +402,7 @@ export const MapGrid: FC<MapGridProps> = ({
         {/* GM-only overlay with grid info */}
         {!isPlayerView && (
             <>
-                <div className="absolute top-2 left-2 bg-background/80 px-2 py-1 rounded-md text-xs text-muted-foreground z-10">
+                <div className="absolute top-2 left-2 bg-background/80 px-2 py-1 rounded-md text-xs text-muted-foreground z-20">
                     Grid: {gridWidth}x{gridHeight} | Tokens: {tokens.length}
                 </div>
                 <MapControls scale={scale} setScale={setScale} resetView={resetView} />
