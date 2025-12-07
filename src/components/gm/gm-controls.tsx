@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/tooltip';
 
 /**
- * Props for the GmControls component.
+ * Props for the GmControlsProps component.
  */
 interface GmControlsProps {
   /** The current opacity of the fog of war (0-100). */
