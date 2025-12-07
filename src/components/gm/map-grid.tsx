@@ -97,8 +97,8 @@ export const MapGrid: FC<MapGridProps> = ({
   const screenToGridCoords = (screenX: number, screenY: number) => {
     if (!transformContainerRef.current) return { x: 0, y: 0 };
     const gridBounds = transformContainerRef.current.getBoundingClientRect();
-    const gridX = (screenX - gridBounds.left) / scale;
-    const gridY = (screenY - gridBounds.top) / scale;
+    const gridX = (screenX - gridBounds.left);
+    const gridY = (screenY - gridBounds.top);
     return { x: gridX, y: gridY };
   };
   
@@ -130,13 +130,13 @@ export const MapGrid: FC<MapGridProps> = ({
     // If moving an existing token, offset the drop point by half the token's size
     // to center the token on the cursor.
     if (token) {
-      const offset = (token.size * GRID_CELL_SIZE) / 2;
+      const offset = (token.size * GRID_CELL_SIZE * scale) / 2;
       dropX -= offset;
       dropY -= offset;
     }
 
-    const newX = Math.floor(dropX / GRID_CELL_SIZE);
-    const newY = Math.floor(dropY / GRID_CELL_SIZE);
+    const newX = Math.floor(dropX / (GRID_CELL_SIZE * scale));
+    const newY = Math.floor(dropY / (GRID_CELL_SIZE * scale));
     
     // Handle drop for new tokens from the library.
     const newTokeDataString = e.dataTransfer.getData("application/json");
@@ -173,8 +173,8 @@ export const MapGrid: FC<MapGridProps> = ({
     
     const { x: gridX, y: gridY } = screenToGridCoords(e.clientX, e.clientY);
 
-    const centerX = Math.floor(gridX / GRID_CELL_SIZE);
-    const centerY = Math.floor(gridY / GRID_CELL_SIZE);
+    const centerX = Math.floor(gridX / (GRID_CELL_SIZE * scale));
+    const centerY = Math.floor(gridY / (GRID_CELL_SIZE * scale));
     
     const shouldReveal = fogInteractionState.current === 'revealing';
     const radius = brushSize! - 1;
@@ -320,13 +320,19 @@ export const MapGrid: FC<MapGridProps> = ({
         onContextMenu={onGridContextMenu}
         onWheel={handleWheel}
         className={cn(
-          "relative aspect-video w-full max-w-full bg-card border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10",
+          "relative aspect-video w-full bg-card border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10",
           !isPlayerView && isFogBrushActive && "cursor-crosshair",
           !isPlayerView && !isFogBrushActive && "cursor-grab",
         )}
       >
         {/* Layer 1: Static Grid Lines. This is always visible and doesn't transform. */}
-        <div className="absolute inset-0 grid-bg z-[1] pointer-events-none" />
+        <div 
+            className="absolute inset-0 grid-bg z-[1] pointer-events-none"
+            style={{
+                backgroundSize: `${GRID_CELL_SIZE * scale}px ${GRID_CELL_SIZE * scale}px`,
+                backgroundPosition: `${viewPosition.x}px ${viewPosition.y}px`,
+            }}
+        />
 
         <div 
             ref={transformContainerRef}
