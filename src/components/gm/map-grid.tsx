@@ -221,8 +221,8 @@ export const MapGrid: FC<MapGridProps> = ({
   const onMouseDown = (e: MouseEvent<HTMLDivElement>) => {
     if (isPlayerView) return;
     
-    // Pan with middle mouse button, or with left-click + space
-    if (e.button === 1 || (e.button === 0 && e.nativeEvent.ctrlKey)) {
+    // Pan with middle mouse button
+    if (e.button === 1) {
         e.preventDefault();
         setIsPanning(true);
         setPanStart({ x: e.clientX - viewPosition.x, y: e.clientY - viewPosition.y });
