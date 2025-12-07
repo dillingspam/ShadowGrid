@@ -39,6 +39,10 @@ interface GmControlsProps {
   onMapChange: (url: string | null, dimensions: { width: number; height: number } | null) => void;
   /** Callback to reset tokens to their initial state. */
   onResetTokens: () => void;
+  /** Whether the grid overlay is visible. */
+  isGridVisible: boolean;
+  /** Callback to toggle the grid overlay visibility. */
+  onGridVisibilityChange: (visible: boolean) => void;
 }
 
 /**
@@ -57,6 +61,8 @@ export function GmControls({
   onBrushSizeChange,
   onMapChange,
   onResetTokens,
+  isGridVisible,
+  onGridVisibilityChange
 }: GmControlsProps) {
   // Ref to the hidden file input element for importing map images.
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -162,11 +168,11 @@ export function GmControls({
           </div>
           <div className="flex items-center justify-between">
             <Label htmlFor="grid-overlay" className="flex-grow">Show Grid Overlay</Label>
-            <Switch id="grid-overlay" defaultChecked />
+            <Switch id="grid-overlay" checked={isGridVisible} onCheckedChange={onGridVisibilityChange} />
           </div>
            <div className="flex items-center justify-between">
-            <Label htmlFor="player-vision" className="flex-grow">Player Vision Lines</Label>
-            <Switch id="player-vision" />
+            <Label htmlFor="player-vision" className="flex-grow text-muted-foreground">Player Vision Lines</Label>
+            <Switch id="player-vision" disabled />
           </div>
           <div className='space-y-2'>
             <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />

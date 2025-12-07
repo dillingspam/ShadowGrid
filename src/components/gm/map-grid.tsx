@@ -52,6 +52,8 @@ interface MapGridProps {
   tokens: TokenData[];
   /** Callback to update the tokens state */
   onTokensChange: (tokens: TokenData[]) => void;
+  /** If true, the grid overlay is visible. */
+  isGridVisible?: boolean;
 }
 
 /**
@@ -69,6 +71,7 @@ export const MapGrid: FC<MapGridProps> = ({
   mapDimensions = null,
   tokens,
   onTokensChange,
+  isGridVisible = true,
 }) => {
   // Calculate grid dimensions based on map image or use defaults.
   const gridWidth = mapDimensions ? Math.ceil(mapDimensions.width / GRID_CELL_SIZE) : DEFAULT_GRID_WIDTH;
@@ -355,13 +358,15 @@ export const MapGrid: FC<MapGridProps> = ({
         }}
       >
         {/* Layer 1: Static Grid Lines. This is always visible and doesn't transform. */}
-        <div 
-            className="absolute inset-0 grid-bg z-[1] pointer-events-none"
-            style={{
-                backgroundSize: `${GRID_CELL_SIZE * scale}px ${GRID_CELL_SIZE * scale}px`,
-                backgroundPosition: `${viewPosition.x}px ${viewPosition.y}px`,
-            }}
-        />
+        {isGridVisible && (
+            <div 
+                className="absolute inset-0 grid-bg z-[1] pointer-events-none"
+                style={{
+                    backgroundSize: `${GRID_CELL_SIZE * scale}px ${GRID_CELL_SIZE * scale}px`,
+                    backgroundPosition: `${viewPosition.x}px ${viewPosition.y}px`,
+                }}
+            />
+        )}
 
         <div 
             ref={transformContainerRef}

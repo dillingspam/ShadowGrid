@@ -37,6 +37,9 @@ export default function GmScreen() {
   // State for tokens
   const [tokens, setTokens] = useState<TokenData[]>(initialTokens);
 
+  // State for grid visibility
+  const [isGridVisible, setIsGridVisible] = useState(true);
+
   const handleResetTokens = () => {
     setTokens(initialTokens);
   };
@@ -56,6 +59,7 @@ export default function GmScreen() {
             mapDimensions={mapDimensions}
             tokens={tokens}
             onTokensChange={setTokens}
+            isGridVisible={isGridVisible}
           />
         </ResizablePanel>
 
@@ -77,6 +81,8 @@ export default function GmScreen() {
                 setMapDimensions(dimensions);
               }}
               onResetTokens={handleResetTokens}
+              isGridVisible={isGridVisible}
+              onGridVisibilityChange={setIsGridVisible}
             />
            </ScrollArea>
            
