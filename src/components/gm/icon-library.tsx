@@ -5,7 +5,7 @@
  */
 
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Tooltip,
@@ -19,6 +19,7 @@ import {
   MoreVertical,
   PlusCircle,
   FolderPlus,
+  Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { IconEditDialog } from './icon-edit-dialog';
@@ -32,7 +33,9 @@ import {
 import { CategoryEditDialog } from './category-edit-dialog';
 import { Separator } from '../ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
-import { cn } from '@/lib/utils';
+import { getIconData, gameIconCategories } from '@/lib/game-icons';
+import { Icon } from '@iconify/react';
+import { Input } from '../ui/input';
 
 /**
  * Interface for a single token template/preset in the library.
@@ -41,7 +44,7 @@ export interface TemplateToken {
   id: string;
   name: string;
   tokenType: string; // e.g., 'player', 'monster', 'item'
-  iconName: string;
+  iconName: string; // e.g., 'game-icons:dragon-head'
 }
 
 /**
@@ -50,7 +53,7 @@ export interface TemplateToken {
 export interface TokenCategory {
   id: string;
   title: string;
-  iconName: string;
+  iconName: string; // e.g., 'Users' (Lucide) or 'game-icons:dragon-head' (Iconify)
   tokens: TemplateToken[];
 }
 
@@ -61,19 +64,19 @@ const initialCategories: TokenCategory[] = [
     title: 'Players & NPCs',
     iconName: 'Users',
     tokens: [
-      { id: 'player-template-1', name: 'Player', tokenType: 'player', iconName: 'Shield' },
-      { id: 'player-template-2', name: 'Guardian', tokenType: 'player', iconName: 'Shield' },
+      { id: 'player-template-1', name: 'Player', tokenType: 'player', iconName: 'game-icons:person' },
+      { id: 'player-template-2', name: 'Guardian', tokenType: 'player', iconName: 'game-icons:shield' },
     ],
   },
   {
     id: 'cat-monster',
     title: 'Monsters',
-    iconName: 'VenetianMask',
+    iconName: 'game-icons:monster-grasp',
     tokens: [
-      { id: 'monster-template-1', name: 'Undead', tokenType: 'monster', iconName: 'Skull' },
-      { id: 'monster-template-2', name: 'Spirit', tokenType: 'monster', iconName: 'Ghost' },
-      { id: 'monster-template-3', name: 'Beast', tokenType: 'monster', iconName: 'Flame' },
-      { id: 'monster-template-4', name: 'Melee', tokenType: 'monster', iconName: 'Swords' },
+      { id: 'monster-template-1', name: 'Undead', tokenType: 'monster', iconName: 'game-icons:skull-trophy' },
+      { id: 'monster-template-2', name: 'Spirit', tokenType: 'monster', iconName: 'game-icons:ghost' },
+      { id: 'monster-template-3', name: 'Beast', tokenType: 'monster', iconName: 'game-icons:wolf-head' },
+      { id: 'monster-template-4', name: 'Melee', tokenType: 'monster', iconName: 'game-icons:sword-in-stone' },
     ],
   },
   {
@@ -81,8 +84,8 @@ const initialCategories: TokenCategory[] = [
     title: 'Items',
     iconName: 'ShoppingBag',
     tokens: [
-      { id: 'item-template-1', name: 'Treasure', tokenType: 'item', iconName: 'Box' },
-      { id: 'item-template-2', name: 'Objective', tokenType: 'item', iconName: 'Gem' },
+      { id: 'item-template-1', name: 'Treasure', tokenType: 'item', iconName: 'game-icons:treasure-chest' },
+      { id: 'item-template-2', name: 'Objective', tokenType: 'item', iconName: 'game-icons:crystal-ball' },
     ],
   },
 ];
@@ -104,8 +107,8 @@ const DraggableToken = ({ token }: { token: TemplateToken }) => {
     e.dataTransfer.setData('application/json', JSON.stringify(dragData));
     e.dataTransfer.effectAllowed = 'copy';
   };
-
-  const IconComponent = iconMap[token.iconName] || iconMap.default;
+  
+  const iconData = getIconData(token.iconName);
 
   return (
     <Tooltip>
@@ -115,7 +118,11 @@ const DraggableToken = ({ token }: { token: TemplateToken }) => {
           onDragStart={onDragStart}
           className="flex aspect-square items-center justify-center rounded-lg bg-background hover:bg-secondary cursor-grab active:cursor-grabbing transition-all text-muted-foreground hover:text-accent hover:drop-shadow-[0_0_5px_hsl(var(--accent))]"
         >
-          <IconComponent className="w-3/4 h-3/4" />
+          {iconData ? (
+             <Icon icon={iconData} className="w-3/4 h-3/4" />
+          ) : (
+             <div className="w-3/4 h-3/4 bg-red-500" /> // Error state
+          )}
         </div>
       </TooltipTrigger>
       <TooltipContent side="top">
@@ -152,15 +159,17 @@ const IconCategory = ({
     onTokenAdd(category.id, newTokenData);
   };
 
-  const CategoryIcon = iconMap[category.iconName] || iconMap.default;
+  const isIconify = category.iconName.includes(':');
+  const CategoryIcon = isIconify ? () => <Icon icon={category.iconName} className="w-4 h-4" /> : iconMap[category.iconName] || iconMap.default;
+
 
   return (
     <>
-      <Collapsible>
+      <Collapsible defaultOpen>
         <div className="flex items-center">
           <CollapsibleTrigger asChild>
             <Button variant="ghost" className="w-full justify-start">
-              <CategoryIcon className="w-4 h-4" />
+              <CategoryIcon />
               <span className="ml-2 flex-1 text-left">{category.title}</span>
             </Button>
           </CollapsibleTrigger>
@@ -221,7 +230,7 @@ const IconCategory = ({
                       setEditingToken({
                         id: '',
                         name: 'New Preset',
-                        iconName: 'HelpCircle',
+                        iconName: 'game-icons:help',
                         tokenType: category.id.startsWith('cat-player') ? 'player' : category.id.startsWith('cat-monster') ? 'monster' : 'item',
                       });
                     }}
@@ -256,6 +265,7 @@ const IconCategory = ({
   );
 };
 
+
 /**
  * The main component for the token library sidebar.
  * It manages the state for all categories and their presets.
@@ -266,6 +276,18 @@ export function IconLibrary() {
   const [categories, setCategories] = useState<TokenCategory[]>(initialCategories);
   const [editingCategory, setEditingCategory] = useState<Omit<TokenCategory, 'tokens'> | null>(null);
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('presets');
+
+  const filteredGameIconCategories = useMemo(() => {
+    if (!searchTerm) {
+      return gameIconCategories;
+    }
+    return gameIconCategories.map(category => {
+      const filteredIcons = category.icons.filter(icon => icon.name.includes(searchTerm.toLowerCase()));
+      return { ...category, icons: filteredIcons };
+    }).filter(category => category.icons.length > 0);
+  }, [searchTerm]);
 
   // Handler to update a specific token preset within a category.
   const handleTokenUpdate = (categoryId: string, updatedToken: TemplateToken) => {
@@ -325,52 +347,124 @@ export function IconLibrary() {
   const handleCategoryDelete = (categoryId: string) => {
     setCategories((prev) => prev.filter((c) => c.id !== categoryId));
   };
+  
+  const DraggableGameIcon = ({ iconName }: { iconName: string }) => {
+    const onDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+      const dragData = {
+        type: 'new-token',
+        tokenType: 'item', // Default type, can be changed later
+        icon: iconName,
+        name: iconName.split(':')[1].replace(/-/g, ' '),
+      };
+      e.dataTransfer.setData('application/json', JSON.stringify(dragData));
+      e.dataTransfer.effectAllowed = 'copy';
+    };
+  
+    const iconData = getIconData(iconName);
+  
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div
+            draggable
+            onDragStart={onDragStart}
+            className="flex aspect-square items-center justify-center rounded-lg bg-background hover:bg-secondary cursor-grab active:cursor-grabbing transition-all text-muted-foreground hover:text-accent hover:drop-shadow-[0_0_5px_hsl(var(--accent))]"
+          >
+            {iconData ? (
+               <Icon icon={iconData} className="w-3/4 h-3/4" />
+            ) : null}
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="top">
+          <p>Drag to add {iconName.split(':')[1]}</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+  };
 
   return (
     <TooltipProvider delayDuration={100}>
-      <div className="p-4">
-        <h3
-          className="text-lg font-semibold font-headline text-primary mb-4"
-          style={{ textShadow: '0 0 5px hsl(var(--primary))' }}
-        >
-          Token Library
-        </h3>
-        <ScrollArea className="max-h-[250px] -mr-4 pr-4">
-          <div className="space-y-2">
-            {categories.map((category) => (
-              <IconCategory
-                key={category.id}
-                category={category}
-                onTokenUpdate={handleTokenUpdate}
-                onTokenDelete={handleTokenDelete}
-                onTokenAdd={handleTokenAdd}
-                onCategoryUpdate={(cat) => {
-                  setEditingCategory(cat);
-                  setIsCreatingCategory(false);
-                }}
-                onCategoryDelete={handleCategoryDelete}
-              />
-            ))}
-          </div>
-        </ScrollArea>
-        <div>
-          <Separator className="my-4" />
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              setIsCreatingCategory(true);
-              setEditingCategory({
-                id: '',
-                title: 'New Category',
-                iconName: 'FolderPlus',
-              });
-            }}
+      <div className="p-4 flex flex-col h-full">
+        <div className="flex justify-between items-center mb-4">
+           <h3
+            className="text-lg font-semibold font-headline text-primary"
+            style={{ textShadow: '0 0 5px hsl(var(--primary))' }}
           >
-            <FolderPlus className="mr-2 h-4 w-4" />
-            Add Category
-          </Button>
+            Token Library
+          </h3>
         </div>
+
+        <div className='flex gap-2 mb-2'>
+            <Button variant={activeTab === 'presets' ? 'secondary' : 'ghost'} onClick={() => setActiveTab('presets')} className="flex-1">Presets</Button>
+            <Button variant={activeTab === 'all' ? 'secondary' : 'ghost'} onClick={() => setActiveTab('all')} className="flex-1">All Icons</Button>
+        </div>
+
+
+        {activeTab === 'presets' ? (
+          <>
+            <ScrollArea className="flex-grow -mr-4 pr-4">
+              <div className="space-y-2">
+                {categories.map((category) => (
+                  <IconCategory
+                    key={category.id}
+                    category={category}
+                    onTokenUpdate={handleTokenUpdate}
+                    onTokenDelete={handleTokenDelete}
+                    onTokenAdd={handleTokenAdd}
+                    onCategoryUpdate={(cat) => {
+                      setEditingCategory(cat);
+                      setIsCreatingCategory(false);
+                    }}
+                    onCategoryDelete={handleCategoryDelete}
+                  />
+                ))}
+              </div>
+            </ScrollArea>
+             <div className="pt-4 mt-auto border-t">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setIsCreatingCategory(true);
+                  setEditingCategory({
+                    id: '',
+                    title: 'New Category',
+                    iconName: 'FolderPlus',
+                  });
+                }}
+              >
+                <FolderPlus className="mr-2 h-4 w-4" />
+                Add Category
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col flex-grow min-h-0">
+             <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search all icons..."
+                className="pl-9"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <ScrollArea className="flex-grow -mr-4 pr-4">
+                {filteredGameIconCategories.map(category => (
+                    <Collapsible defaultOpen key={category.name} className="mb-2">
+                        <CollapsibleTrigger className="w-full text-left font-semibold text-sm text-muted-foreground mb-2">{category.name}</CollapsibleTrigger>
+                        <CollapsibleContent>
+                            <div className="grid grid-cols-4 gap-4">
+                                {category.icons.map(icon => (
+                                    <DraggableGameIcon key={icon.fullName} iconName={icon.fullName} />
+                                ))}
+                            </div>
+                        </CollapsibleContent>
+                    </Collapsible>
+                ))}
+            </ScrollArea>
+          </div>
+        )}
       </div>
 
       {/* Dialog for editing or creating a category */}

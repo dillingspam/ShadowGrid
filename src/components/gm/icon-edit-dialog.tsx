@@ -4,7 +4,7 @@
  */
 
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -15,9 +15,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Save, PlusCircle } from 'lucide-react';
+import { Save, PlusCircle, Search } from 'lucide-react';
 import type { TemplateToken } from './icon-library';
-import { iconMap } from './token';
+import { getIconData, allGameIcons } from '@/lib/game-icons';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
 import {
@@ -26,6 +26,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '../ui/tooltip';
+import { Icon } from '@iconify/react';
+
 
 /**
  * Props for the IconEditDialog component.
@@ -43,10 +45,6 @@ interface IconEditDialogProps {
   onClose: () => void;
 }
 
-// Get the list of available icons from the iconMap, filtering out special or non-standard icons.
-const availableIcons = Object.keys(iconMap).filter(
-  (key) => key !== 'default' && key !== 'Player' && key !== 'Monster'
-);
 
 /**
  * A dialog for creating or editing a token preset's properties (name and icon).
@@ -57,12 +55,20 @@ const availableIcons = Object.keys(iconMap).filter(
 export function IconEditDialog({ token, isCreating, onUpdate, onCreate, onClose }: IconEditDialogProps) {
   const [name, setName] = useState('');
   const [iconName, setIconName] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredIcons = useMemo(() => {
+      if (!searchTerm) {
+          return allGameIcons;
+      }
+      return allGameIcons.filter(icon => icon.name.includes(searchTerm.toLowerCase()));
+  }, [searchTerm]);
 
   // Effect to populate the dialog's state when the token prop changes.
   useEffect(() => {
     if (token) {
       setName(isCreating ? 'New Preset' : token.name);
-      setIconName(isCreating ? 'HelpCircle' : token.iconName);
+      setIconName(isCreating ? 'game-icons:help' : token.iconName);
     }
   }, [token, isCreating]);
 
@@ -85,7 +91,7 @@ export function IconEditDialog({ token, isCreating, onUpdate, onCreate, onClose 
 
   return (
     <Dialog open={!!token} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>
         </DialogHeader>
@@ -106,28 +112,39 @@ export function IconEditDialog({ token, isCreating, onUpdate, onCreate, onClose 
           <div className="grid grid-cols-4 items-start gap-4">
             <Label className="text-right pt-2">Icon</Label>
             <div className="col-span-3">
-              <ScrollArea className="h-32 w-full rounded-md border p-2">
+              <div className="relative mb-2">
+                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                 <Input 
+                    placeholder="Search icons..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9"
+                 />
+              </div>
+              <ScrollArea className="h-64 w-full rounded-md border p-2">
                 <TooltipProvider>
-                  <div className="grid grid-cols-5 gap-2">
-                    {availableIcons.map((key) => {
-                      const IconComponent = iconMap[key];
+                  <div className="grid grid-cols-6 gap-1">
+                    {filteredIcons.map((icon) => {
+                      const iconData = getIconData(icon.fullName);
+                      if (!iconData) return null;
+
                       return (
-                        <Tooltip key={key}>
+                        <Tooltip key={icon.fullName}>
                           <TooltipTrigger asChild>
                             <Button
                               variant="ghost"
                               size="icon"
                               className={cn(
                                 'h-12 w-12',
-                                iconName === key && 'bg-accent text-accent-foreground'
+                                iconName === icon.fullName && 'bg-accent text-accent-foreground'
                               )}
-                              onClick={() => setIconName(key)}
+                              onClick={() => setIconName(icon.fullName)}
                             >
-                              <IconComponent className="h-6 w-6" />
+                              <Icon icon={iconData} className="h-6 w-6" />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>{key}</p>
+                            <p>{icon.name}</p>
                           </TooltipContent>
                         </Tooltip>
                       );
