@@ -10,6 +10,10 @@ import { IconLibrary } from '@/components/gm/icon-library';
 import { MapGrid } from '@/components/gm/map-grid';
 import { Header } from '@/components/shared/header';
 import { Separator } from '@/components/ui/separator';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Settings } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 /**
  * The main component for the GM screen.
@@ -30,12 +34,33 @@ export default function GMPage() {
   // State to hold the dimensions of the uploaded map image.
   const [mapDimensions, setMapDimensions] = useState<{ width: number, height: number } | null>(null);
   
+  const gmControlsPanel = (
+    <>
+      <IconLibrary />
+      <Separator />
+      <ScrollArea className="flex-1">
+        <GmControls 
+          fogOpacity={fogOpacity} 
+          onFogOpacityChange={setFogOpacity}
+          isFogBrushActive={isFogBrushActive}
+          onFogBrushToggle={setIsFogBrushActive}
+          brushSize={brushSize}
+          onBrushSizeChange={setBrushSize}
+          onMapChange={(url, dimensions) => {
+            setMapImage(url);
+            setMapDimensions(dimensions);
+          }}
+        />
+      </ScrollArea>
+    </>
+  );
+
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
       <Header title="GM Screen" />
       {/* Main layout grid: map on the left, controls on the right (on medium screens and up) */}
       <div className="grid md:grid-cols-[1fr_350px] flex-1 overflow-hidden">
-        <main className="flex items-center justify-center overflow-auto p-4">
+        <main className="flex items-center justify-center overflow-auto p-4 relative">
           {/* The main map grid where tokens and fog are displayed */}
           <MapGrid 
             fogOpacity={fogOpacity} 
@@ -44,25 +69,28 @@ export default function GMPage() {
             mapImage={mapImage}
             mapDimensions={mapDimensions}
           />
+          {/* Mobile-only button to open the controls sheet */}
+          <div className="absolute bottom-4 left-4 z-10 md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="bg-background/80">
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[350px] flex flex-col p-0">
+                  <SheetHeader className="p-4 border-b">
+                     <SheetTitle>GM Controls</SheetTitle>
+                  </SheetHeader>
+                  <div className="flex flex-col flex-1 overflow-hidden">
+                    {gmControlsPanel}
+                  </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </main>
         {/* Sidebar for GM controls and token library */}
         <aside className="hidden md:flex flex-col bg-card border-l border-border">
-          <IconLibrary />
-          <Separator />
-          <div className="flex-1 overflow-y-auto">
-            <GmControls 
-              fogOpacity={fogOpacity} 
-              onFogOpacityChange={setFogOpacity}
-              isFogBrushActive={isFogBrushActive}
-              onFogBrushToggle={setIsFogBrushActive}
-              brushSize={brushSize}
-              onBrushSizeChange={setBrushSize}
-              onMapChange={(url, dimensions) => {
-                setMapImage(url);
-                setMapDimensions(dimensions);
-              }}
-            />
-          </div>
+          {gmControlsPanel}
         </aside>
       </div>
     </div>
