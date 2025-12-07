@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { Dices, ShieldQuestion, Brush, Map, Trash2, MousePointerClick } from 'lucide-react';
+import { Dices, ShieldQuestion, Brush, Map, Trash2, MousePointerClick, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Tooltip,
@@ -37,6 +37,8 @@ interface GmControlsProps {
   onBrushSizeChange: (value: number) => void;
   /** Callback to update the map image and its dimensions. */
   onMapChange: (url: string | null, dimensions: { width: number; height: number } | null) => void;
+  /** Callback to reset tokens to their initial state. */
+  onResetTokens: () => void;
 }
 
 /**
@@ -53,7 +55,8 @@ export function GmControls({
   onFogBrushToggle,
   brushSize,
   onBrushSizeChange,
-  onMapChange
+  onMapChange,
+  onResetTokens,
 }: GmControlsProps) {
   // Ref to the hidden file input element for importing map images.
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -170,6 +173,10 @@ export function GmControls({
             <Button variant="outline" className="w-full" onClick={handleImportClick}>
               <Map className="mr-2 h-4 w-4" />
               Import Map
+            </Button>
+             <Button variant="outline" className="w-full" onClick={onResetTokens}>
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Reset Tokens
             </Button>
             <Button variant="destructive" className="w-full" onClick={handleClearMap}>
               <Trash2 className="mr-2 h-4 w-4" />

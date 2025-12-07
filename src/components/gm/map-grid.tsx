@@ -16,7 +16,7 @@ import { TokenEditDialog } from './token-edit-dialog';
 import { MapControls } from './map-controls';
 
 // Initial set of tokens for demonstration purposes.
-const initialTokens: TokenData[] = [
+export const initialTokens: TokenData[] = [
   { id: 'player1', x: 3, y: 4, color: 'hsl(var(--accent))', icon: 'User', size: 1, name: 'Cyber-Ronin' },
   { id: 'player2', x: 5, y: 5, color: 'hsl(var(--accent))', icon: 'Shield', size: 1, name: 'Net-Witch' },
   { id: 'monster1', x: 10, y: 8, color: 'hsl(var(--destructive))', icon: 'Skull', size: 2, name: 'Security Drone' },
@@ -48,6 +48,10 @@ interface MapGridProps {
   mapImage?: string | null;
   /** The dimensions of the background map image. */
   mapDimensions?: { width: number; height: number } | null;
+  /** The current state of the tokens on the map */
+  tokens: TokenData[];
+  /** Callback to update the tokens state */
+  onTokensChange: (tokens: TokenData[]) => void;
 }
 
 /**
@@ -62,10 +66,10 @@ export const MapGrid: FC<MapGridProps> = ({
   isFogBrushActive = false,
   brushSize = 3,
   mapImage = null,
-  mapDimensions = null
+  mapDimensions = null,
+  tokens,
+  onTokensChange,
 }) => {
-  const [tokens, setTokens] = useState(initialTokens);
-  
   // Calculate grid dimensions based on map image or use defaults.
   const gridWidth = mapDimensions ? Math.ceil(mapDimensions.width / GRID_CELL_SIZE) : DEFAULT_GRID_WIDTH;
   const gridHeight = mapDimensions ? Math.ceil(mapDimensions.height / GRID_CELL_SIZE) : DEFAULT_GRID_HEIGHT;
@@ -175,14 +179,14 @@ export const MapGrid: FC<MapGridProps> = ({
         name: `${name} ${tokens.filter(t => t.name.startsWith(name)).length + 1}`
       };
 
-      setTokens(prev => [...prev, newToken]);
+      onTokensChange([...tokens, newToken]);
       return;
     }
     
     // If it was an existing token, update its position.
     if (!token) return;
-    setTokens((prevTokens) =>
-      prevTokens.map((t) =>
+    onTokensChange(
+      tokens.map((t) =>
         t.id === tokenId ? { ...t, x: newX, y: newY } : t
       )
     );
@@ -223,12 +227,12 @@ export const MapGrid: FC<MapGridProps> = ({
 
   // Callback to update a token's data from the edit dialog.
   const handleTokenUpdate = (updatedToken: TokenData) => {
-    setTokens(tokens.map(t => t.id === updatedToken.id ? updatedToken : t));
+    onTokensChange(tokens.map(t => t.id === updatedToken.id ? updatedToken : t));
   };
   
   // Callback to delete a token.
   const handleTokenDelete = (tokenId: string) => {
-    setTokens(tokens.filter(t => t.id !== tokenId));
+    onTokensChange(tokens.filter(t => t.id !== tokenId));
   };
   
   // Opens the token edit dialog on right-click.
@@ -286,7 +290,7 @@ export const MapGrid: FC<MapGridProps> = ({
   
   // Handles zooming with the mouse wheel.
   const handleWheel = (e: WheelEvent<HTMLDivElement>) => {
-    if (isPlayerView || !gridRef.current) return;
+    if (!gridRef.current) return;
     e.preventDefault();
     
     const rect = gridRef.current.getBoundingClientRect();
@@ -343,14 +347,11 @@ export const MapGrid: FC<MapGridProps> = ({
         className={cn(
           "relative bg-card border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10",
           !isPlayerView && isFogBrushActive && "cursor-crosshair",
-          !isPlayerView && !isFogBrushActive && "cursor-grab",
+           !isPlayerView && !isPanning && !isFogBrushActive && "cursor-grab"
         )}
         style={{
-          width: mapDimensions ? 'auto' : `${containerWidth}px`,
-          height: mapDimensions ? 'auto' : `${containerHeight}px`,
-          aspectRatio: mapDimensions ? `${mapDimensions.width} / ${mapDimensions.height}` : 'auto',
-          maxWidth: '100%',
-          maxHeight: '100%',
+          width: '100%',
+          height: '100%',
         }}
       >
         {/* Layer 1: Static Grid Lines. This is always visible and doesn't transform. */}
@@ -364,7 +365,7 @@ export const MapGrid: FC<MapGridProps> = ({
 
         <div 
             ref={transformContainerRef}
-            className="absolute inset-0"
+            className="absolute"
             style={{
                 width: `${containerWidth}px`,
                 height: `${containerHeight}px`,

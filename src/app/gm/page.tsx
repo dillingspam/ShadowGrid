@@ -7,7 +7,8 @@
 
 import { useState } from 'react';
 import { Header } from '@/components/shared/header';
-import { MapGrid } from '@/components/gm/map-grid';
+import { MapGrid, initialTokens } from '@/components/gm/map-grid';
+import type { TokenData } from '@/components/gm/token';
 import { GmControls } from '@/components/gm/gm-controls';
 import { IconLibrary } from '@/components/gm/icon-library';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -33,9 +34,16 @@ export default function GmScreen() {
   const [mapImage, setMapImage] = useState<string | null>(null);
   const [mapDimensions, setMapDimensions] = useState<{ width: number, height: number } | null>(null);
 
+  // State for tokens
+  const [tokens, setTokens] = useState<TokenData[]>(initialTokens);
+
+  const handleResetTokens = () => {
+    setTokens(initialTokens);
+  };
+
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
-      <Header />
+      <Header title="GM Screen"/>
       <ResizablePanelGroup direction="horizontal" className="flex-grow">
         
         {/* Main Content: Map Grid */}
@@ -46,6 +54,8 @@ export default function GmScreen() {
             brushSize={brushSize}
             mapImage={mapImage}
             mapDimensions={mapDimensions}
+            tokens={tokens}
+            onTokensChange={setTokens}
           />
         </ResizablePanel>
 
@@ -66,6 +76,7 @@ export default function GmScreen() {
                 setMapImage(url);
                 setMapDimensions(dimensions);
               }}
+              onResetTokens={handleResetTokens}
             />
            </ScrollArea>
            
