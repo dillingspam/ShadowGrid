@@ -25,8 +25,8 @@ const initialTokens: TokenData[] = [
 ];
 
 // Constants for the grid dimensions.
-const GRID_WIDTH = 40;
-const GRID_HEIGHT = 25;
+const GRID_WIDTH = 48;
+const GRID_HEIGHT = 27;
 const MIN_SCALE = 0.2;
 const MAX_SCALE = 3;
 
