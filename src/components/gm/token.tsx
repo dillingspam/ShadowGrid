@@ -5,8 +5,7 @@
 
 import type { FC, MouseEvent } from 'react';
 import { cn } from '@/lib/utils';
-import { PlayerTokenIcon, MonsterTokenIcon } from '@/components/icons';
-import { Shield, HelpCircle, User, Swords, Skull, Gem, Box, Ghost, Flame, VenetianMask, ShoppingBag, Users, PlusCircle, FolderPlus } from 'lucide-react';
+import { Icon } from '@/components/shared/icon';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 /** The size of one grid cell in pixels. */
@@ -20,7 +19,7 @@ export interface TokenData {
   x: number; // The x-coordinate on the grid (0-indexed).
   y: number; // The y-coordinate on the grid (0-indexed).
   color: string; // The background color of the token (CSS color value).
-  icon: string; // The key for the icon to display (maps to `iconMap`).
+  icon: string; // The name of the icon to display (either Lucide or Iconify format).
   size: number; // The size of the token in grid cells (e.g., 1 for 1x1, 2 for 2x2).
   name: string; // The name of the token, displayed in a tooltip.
 }
@@ -36,32 +35,6 @@ interface TokenProps extends TokenData {
 }
 
 /**
- * A mapping of string keys to icon components.
- * This allows for dynamically selecting icons based on token data.
- */
-export const iconMap: { [key: string]: React.ComponentType<{ className?: string, size?: number }> } = {
-  // Custom icons
-  Player: PlayerTokenIcon,
-  Monster: MonsterTokenIcon,
-  // Lucide icons
-  User,
-  Shield,
-  Swords,
-  Skull,
-  Gem,
-  Box,
-  Ghost,
-  Flame,
-  VenetianMask,
-  ShoppingBag,
-  Users,
-  PlusCircle,
-  FolderPlus,
-  // Fallback icon
-  default: HelpCircle,
-};
-
-/**
  * The Token component, representing a single entity on the map.
  * It's draggable, customizable, and displays an icon and a tooltip.
  *
@@ -70,8 +43,6 @@ export const iconMap: { [key: string]: React.ComponentType<{ className?: string,
  */
 export const Token: FC<TokenProps> = (props) => {
   const { id, x, y, color, icon, size, name, onContextMenu, isPlayerView } = props;
-  // Select the icon component from the map, or use the default.
-  const IconComponent = iconMap[icon] || iconMap.default;
 
   // Handler for starting a drag operation.
   const onDragStart = (e: React.DragEvent<HTMLDivElement>) => {
@@ -119,7 +90,7 @@ export const Token: FC<TokenProps> = (props) => {
             style={tokenStyle}
           >
             {/* The icon is sized to be 75% of its container, ensuring it scales with the token size. */}
-            <IconComponent className="w-[75%] h-[75%]" />
+            <Icon name={icon} className="w-[75%] h-[75%]" />
           </div>
         </TooltipTrigger>
         <TooltipContent>

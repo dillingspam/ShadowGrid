@@ -17,15 +17,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Save, PlusCircle } from 'lucide-react';
 import type { TemplateToken } from './icon-library';
-import { iconMap } from './token';
-import { ScrollArea } from '../ui/scroll-area';
-import { cn } from '@/lib/utils';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '../ui/tooltip';
+import { IconPickerDialog } from './icon-picker-dialog';
+import { Icon } from '../shared/icon';
 
 /**
  * Props for the IconEditDialog component.
@@ -43,11 +36,6 @@ interface IconEditDialogProps {
   onClose: () => void;
 }
 
-// Get the list of available icons from the iconMap, filtering out special or non-standard icons.
-const availableIcons = Object.keys(iconMap).filter(
-  (key) => key !== 'default' && key !== 'Player' && key !== 'Monster'
-);
-
 /**
  * A dialog for creating or editing a token preset's properties (name and icon).
  *
@@ -56,13 +44,14 @@ const availableIcons = Object.keys(iconMap).filter(
  */
 export function IconEditDialog({ token, isCreating, onUpdate, onCreate, onClose }: IconEditDialogProps) {
   const [name, setName] = useState('');
-  const [iconName, setIconName] = useState('');
+  const [iconName, setIconName] = useState('game-icons:help');
+  const [isIconPickerOpen, setIconPickerOpen] = useState(false);
 
   // Effect to populate the dialog's state when the token prop changes.
   useEffect(() => {
     if (token) {
       setName(isCreating ? 'New Preset' : token.name);
-      setIconName(isCreating ? 'HelpCircle' : token.iconName);
+      setIconName(isCreating ? 'game-icons:help' : token.iconName);
     }
   }, [token, isCreating]);
 
@@ -102,42 +91,16 @@ export function IconEditDialog({ token, isCreating, onUpdate, onCreate, onClose 
               className="col-span-3"
             />
           </div>
-          {/* Scrollable grid for selecting an icon */}
-          <div className="grid grid-cols-4 items-start gap-4">
-            <Label className="text-right pt-2">Icon</Label>
-            <div className="col-span-3">
-              <ScrollArea className="h-32 w-full rounded-md border p-2">
-                <TooltipProvider>
-                  <div className="grid grid-cols-5 gap-2">
-                    {availableIcons.map((key) => {
-                      const IconComponent = iconMap[key];
-                      return (
-                        <Tooltip key={key}>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className={cn(
-                                'h-12 w-12',
-                                iconName === key && 'bg-accent text-accent-foreground'
-                              )}
-                              onClick={() => setIconName(key)}
-                            >
-                              <IconComponent className="h-6 w-6" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{key}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      );
-                    })}
-                  </div>
-                </TooltipProvider>
-              </ScrollArea>
-               <p className="text-xs text-muted-foreground mt-2">
-                Selected Icon: <span className="font-semibold">{iconName}</span>
-              </p>
+          {/* Icon Picker Button and Preview */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right">Icon</Label>
+            <div className="col-span-3 flex items-center gap-2">
+                <div className="w-10 h-10 border rounded-md flex items-center justify-center bg-gray-100">
+                  <Icon name={iconName} size={24} />
+                </div>
+                <Button variant="outline" onClick={() => setIconPickerOpen(true)}>
+                  Choose Icon
+                </Button>
             </div>
           </div>
         </div>
@@ -147,6 +110,11 @@ export function IconEditDialog({ token, isCreating, onUpdate, onCreate, onClose 
           </Button>
         </DialogFooter>
       </DialogContent>
+      <IconPickerDialog
+        open={isIconPickerOpen}
+        onOpenChange={setIconPickerOpen}
+        onSelectIcon={setIconName}
+      />
     </Dialog>
   );
 }

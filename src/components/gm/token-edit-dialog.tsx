@@ -1,8 +1,3 @@
-/**
- * @file This file defines a dialog component for editing the properties of an individual token
- * that has been placed on the map grid.
- */
-
 'use client';
 import { useState, useEffect } from 'react';
 import {
@@ -25,6 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { IconPickerDialog } from './icon-picker-dialog';
+import { Icon } from '../shared/icon';
 
 /**
  * Props for the TokenEditDialog component.
@@ -65,6 +62,8 @@ export function TokenEditDialog({
   const [name, setName] = useState('');
   const [size, setSize] = useState(1);
   const [color, setColor] = useState('');
+  const [iconName, setIconName] = useState('game-icons:monster-skull');
+  const [isIconPickerOpen, setIconPickerOpen] = useState(false);
 
   // Effect to populate the dialog's state when the token prop changes.
   useEffect(() => {
@@ -72,6 +71,7 @@ export function TokenEditDialog({
       setName(token.name);
       setSize(token.size);
       setColor(token.color);
+      setIconName(token.icon);
     }
   }, [token]);
 
@@ -82,7 +82,7 @@ export function TokenEditDialog({
 
   // Calls the onUpdate callback with the modified token data.
   const handleSave = () => {
-    onUpdate({ ...token, name, size, color });
+    onUpdate({ ...token, name, size, color, icon: iconName });
     onClose();
   };
 
@@ -152,6 +152,18 @@ export function TokenEditDialog({
               </SelectContent>
             </Select>
           </div>
+          {/* Icon Picker */}
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Icon</Label>
+                <div className="col-span-3 flex items-center gap-2">
+                    <div className="w-10 h-10 border rounded-md flex items-center justify-center bg-gray-100">
+                        <Icon name={iconName} size={24} />
+                    </div>
+                    <Button variant="outline" onClick={() => setIconPickerOpen(true)}>
+                        Choose Icon
+                    </Button>
+                </div>
+            </div>
         </div>
         <DialogFooter className="sm:justify-between">
           <Button variant="destructive" onClick={handleDelete} className='mb-2 sm:mb-0'>
@@ -162,6 +174,11 @@ export function TokenEditDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+      <IconPickerDialog
+        open={isIconPickerOpen}
+        onOpenChange={setIconPickerOpen}
+        onSelectIcon={setIconName}
+      />
     </Dialog>
   );
 }

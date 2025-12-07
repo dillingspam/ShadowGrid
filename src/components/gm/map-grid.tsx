@@ -126,7 +126,10 @@ export const MapGrid: FC<MapGridProps> = ({
     return { x: gridX, y: gridY };
   };
   
-  // Handles when an item is dragged over the grid.
+  /**
+   * Handles drag-over events on the grid to set the drop effect.
+   * @param {DragEvent} e The drag event object.
+   */
   const onDragOver = (e: DragEvent) => {
     e.preventDefault();
     // Set drop effect based on the type of data being dragged.
@@ -137,7 +140,10 @@ export const MapGrid: FC<MapGridProps> = ({
     }
   };
 
-  // Handles when an item is dropped onto the grid.
+  /**
+   * Handles drop events on the grid for both new and existing tokens.
+   * @param {DragEvent} e The drop event object.
+   */
   const onDrop = (e: DragEvent) => {
     e.preventDefault();
     if (isPlayerView || !gridRef.current) return;
@@ -195,7 +201,10 @@ export const MapGrid: FC<MapGridProps> = ({
     );
   };
   
-  // Handles mouse movement over the grid to paint/unpaint fog.
+  /**
+   * Handles mouse movement over the grid to paint or unpaint fog.
+   * @param {MouseEvent<HTMLDivElement>} e The mouse event object.
+   */
   const handleFogInteraction = (e: MouseEvent<HTMLDivElement>) => {
     if (isPlayerView || !gridRef.current || !fogInteractionState.current) return;
     
@@ -228,24 +237,37 @@ export const MapGrid: FC<MapGridProps> = ({
     });
   };
 
-  // Callback to update a token's data from the edit dialog.
+  /**
+   * Callback to update a token's data from the edit dialog.
+   * @param {TokenData} updatedToken The updated token data.
+   */
   const handleTokenUpdate = (updatedToken: TokenData) => {
     onTokensChange(tokens.map(t => t.id === updatedToken.id ? updatedToken : t));
   };
   
-  // Callback to delete a token.
+  /**
+   * Callback to delete a token.
+   * @param {string} tokenId The ID of the token to delete.
+   */
   const handleTokenDelete = (tokenId: string) => {
     onTokensChange(tokens.filter(t => t.id !== tokenId));
   };
   
-  // Opens the token edit dialog on right-click.
+  /**
+   * Opens the token edit dialog on right-click.
+   * @param {MouseEvent} e The mouse event object.
+   * @param {TokenData} token The token to edit.
+   */
   const handleTokenContextMenu = (e: MouseEvent, token: TokenData) => {
     if (isPlayerView) return;
     e.preventDefault();
     setEditingToken(token);
   };
 
-  // Sets the interaction mode (panning or fog) on mouse down.
+  /**
+   * Sets the interaction mode (panning or fog) on mouse down.
+   * @param {MouseEvent<HTMLDivElement>} e The mouse event object.
+   */
   const onMouseDown = (e: MouseEvent<HTMLDivElement>) => {
     if (isPlayerView) return;
     
@@ -269,7 +291,10 @@ export const MapGrid: FC<MapGridProps> = ({
     }
   };
 
-  // Continues the interaction on mouse move.
+  /**
+   * Continues the interaction on mouse move (panning or fog).
+   * @param {MouseEvent<HTMLDivElement>} e The mouse event object.
+   */
   const onMouseMove = (e: MouseEvent<HTMLDivElement>) => {
      if (isPanning) {
         const newX = e.clientX - panStart.x;
@@ -282,7 +307,10 @@ export const MapGrid: FC<MapGridProps> = ({
     handleFogInteraction(e);
   };
   
-  // Resets the interaction mode on mouse up.
+  /**
+   * Resets the interaction mode on mouse up.
+   * @param {MouseEvent<HTMLDivElement>} e The mouse event object.
+   */
   const onMouseUp = (e: MouseEvent<HTMLDivElement>) => {
     if (isPanning) {
         setIsPanning(false);
@@ -291,7 +319,10 @@ export const MapGrid: FC<MapGridProps> = ({
     fogInteractionState.current = null;
   };
   
-  // Handles zooming with the mouse wheel.
+  /**
+   * Handles zooming with the mouse wheel.
+   * @param {WheelEvent<HTMLDivElement>} e The wheel event object.
+   */
   const handleWheel = (e: WheelEvent<HTMLDivElement>) => {
     if (!gridRef.current) return;
     e.preventDefault();
@@ -314,12 +345,18 @@ export const MapGrid: FC<MapGridProps> = ({
     setScale(newScale);
   };
   
+  /**
+   * Resets the view to the default pan and zoom.
+   */
   const resetView = () => {
     setScale(1);
     setViewPosition({ x: 0, y: 0 });
   }
 
-  // Also reset on mouse leave to prevent getting "stuck" in a mode.
+  /**
+   * Resets the interaction state when the mouse leaves the grid area.
+   * @param {MouseEvent<HTMLDivElement>} e The mouse event object.
+   */
   const onMouseLeave = (e: MouseEvent<HTMLDivElement>) => {
     if (isPanning) {
         setIsPanning(false);
@@ -328,7 +365,10 @@ export const MapGrid: FC<MapGridProps> = ({
     fogInteractionState.current = null;
   };
   
-  // Prevents the browser's context menu when using the fog brush or panning.
+  /**
+   * Prevents the browser's context menu when using the fog brush or panning.
+   * @param {MouseEvent<HTMLDivElement>} e The mouse event object.
+   */
   const onGridContextMenu = (e: MouseEvent<HTMLDivElement>) => {
     if (isFogBrushActive || e.button === 1) {
       e.preventDefault();
