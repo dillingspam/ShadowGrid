@@ -95,10 +95,10 @@ export const MapGrid: FC<MapGridProps> = ({
    * @returns {{x: number, y: number}} The corresponding grid coordinates.
    */
   const screenToGridCoords = (screenX: number, screenY: number) => {
-    if (!gridRef.current) return { x: 0, y: 0 };
-    const gridBounds = gridRef.current.getBoundingClientRect();
-    const gridX = (screenX - gridBounds.left - viewPosition.x) / scale;
-    const gridY = (screenY - gridBounds.top - viewPosition.y) / scale;
+    if (!transformContainerRef.current) return { x: 0, y: 0 };
+    const gridBounds = transformContainerRef.current.getBoundingClientRect();
+    const gridX = (screenX - gridBounds.left) / scale;
+    const gridY = (screenY - gridBounds.top) / scale;
     return { x: gridX, y: gridY };
   };
   
@@ -119,7 +119,6 @@ export const MapGrid: FC<MapGridProps> = ({
     if (isPlayerView || !gridRef.current) return;
 
     const tokenId = e.dataTransfer.getData("application/reactflow"); // For existing tokens
-    const token = tokens.find((t) => t.id === tokenId);
     
     // Calculate drop position relative to the grid, accounting for pan/zoom.
     const { x: gridX, y: gridY } = screenToGridCoords(e.clientX, e.clientY);
@@ -127,6 +126,7 @@ export const MapGrid: FC<MapGridProps> = ({
     let dropX = gridX;
     let dropY = gridY;
 
+    const token = tokens.find((t) => t.id === tokenId);
     // If moving an existing token, offset the drop point by half the token's size
     // to center the token on the cursor.
     if (token) {
@@ -265,19 +265,25 @@ export const MapGrid: FC<MapGridProps> = ({
   
   // Handles zooming with the mouse wheel.
   const handleWheel = (e: WheelEvent<HTMLDivElement>) => {
-    if (isPlayerView) return;
+    if (isPlayerView || !gridRef.current) return;
     e.preventDefault();
-
+    
+    const rect = gridRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
     const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale - e.deltaY * 0.001));
 
-    const { x: mouseX, y: mouseY } = screenToGridCoords(e.clientX, e.clientY);
-    
-    // Adjust viewPosition so the point under the cursor stays the same
-    const newViewPosX = viewPosition.x - mouseX * (newScale - scale);
-    const newViewPosY = viewPosition.y - mouseY * (newScale - scale);
+    // The point in the content that was under the mouse
+    const mousePointX = (mouseX - viewPosition.x) / scale;
+    const mousePointY = (mouseY - viewPosition.y) / scale;
 
-    setScale(newScale);
+    // The new view position is calculated so the mouse point stays at the same screen position
+    const newViewPosX = mouseX - mousePointX * newScale;
+    const newViewPosY = mouseY - mousePointY * newScale;
+
     setViewPosition({ x: newViewPosX, y: newViewPosY });
+    setScale(newScale);
   };
   
   const resetView = () => {
@@ -314,22 +320,26 @@ export const MapGrid: FC<MapGridProps> = ({
         onContextMenu={onGridContextMenu}
         onWheel={handleWheel}
         className={cn(
-          "relative bg-card border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10",
+          "relative aspect-video w-full max-w-full bg-card border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10",
           !isPlayerView && isFogBrushActive && "cursor-crosshair",
           !isPlayerView && !isFogBrushActive && "cursor-grab",
         )}
-        style={{
-          width: `${GRID_WIDTH * GRID_CELL_SIZE}px`,
-          height: `${GRID_HEIGHT * GRID_CELL_SIZE}px`,
-        }}
       >
-        {/* Layer 1: Grid Lines (Static) */}
-        <div className="absolute inset-0 grid-bg z-[1] pointer-events-none" />
+        {/* Layer 1: Static Grid Lines. This is outside the transform container so it doesn't zoom. */}
+        <div 
+          className="absolute inset-0 grid-bg z-[1] pointer-events-none"
+          style={{
+            backgroundSize: `${GRID_CELL_SIZE * scale}px ${GRID_CELL_SIZE * scale}px`,
+            backgroundPosition: `${viewPosition.x}px ${viewPosition.y}px`,
+          }}
+        />
 
         <div 
             ref={transformContainerRef}
             className="w-full h-full"
             style={{
+                width: `${GRID_WIDTH * GRID_CELL_SIZE}px`,
+                height: `${GRID_HEIGHT * GRID_CELL_SIZE}px`,
                 transform: `translate(${viewPosition.x}px, ${viewPosition.y}px) scale(${scale})`,
                 transformOrigin: '0 0',
             }}
