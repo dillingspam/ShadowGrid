@@ -40,6 +40,9 @@ export default function GmScreen() {
   // State for grid visibility
   const [isGridVisible, setIsGridVisible] = useState(true);
 
+  /**
+   * Resets the tokens to their initial state.
+   */
   const handleResetTokens = () => {
     setTokens(initialTokens);
   };

@@ -4,7 +4,7 @@
  */
 
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -15,20 +15,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Save, PlusCircle, Search } from 'lucide-react';
+import { Save, PlusCircle } from 'lucide-react';
 import type { TemplateToken } from './icon-library';
-import { getIconData, gameIconCategories } from '@/lib/game-icons';
-import { ScrollArea } from '../ui/scroll-area';
-import { cn } from '@/lib/utils';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '../ui/tooltip';
-import { Icon } from '@iconify/react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
-
+import { IconPickerDialog } from './icon-picker-dialog';
+import { Icon } from '../shared/icon';
 
 /**
  * Props for the IconEditDialog component.
@@ -46,7 +36,6 @@ interface IconEditDialogProps {
   onClose: () => void;
 }
 
-
 /**
  * A dialog for creating or editing a token preset's properties (name and icon).
  *
@@ -55,18 +44,8 @@ interface IconEditDialogProps {
  */
 export function IconEditDialog({ token, isCreating, onUpdate, onCreate, onClose }: IconEditDialogProps) {
   const [name, setName] = useState('');
-  const [iconName, setIconName] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const filteredGameIconCategories = useMemo(() => {
-    if (!searchTerm) {
-      return gameIconCategories;
-    }
-    return gameIconCategories.map(category => {
-      const filteredIcons = category.icons.filter(icon => icon.name.includes(searchTerm.toLowerCase()));
-      return { ...category, icons: filteredIcons };
-    }).filter(category => category.icons.length > 0);
-  }, [searchTerm]);
+  const [iconName, setIconName] = useState('game-icons:help');
+  const [isIconPickerOpen, setIconPickerOpen] = useState(false);
 
   // Effect to populate the dialog's state when the token prop changes.
   useEffect(() => {
@@ -95,95 +74,34 @@ export function IconEditDialog({ token, isCreating, onUpdate, onCreate, onClose 
 
   return (
     <Dialog open={!!token} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>
         </DialogHeader>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-          {/* Column 1: Settings */}
-          <div className="space-y-6">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name
-                </Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                 <Label className="text-right">
-                  Preview
-                </Label>
-                <div className="col-span-3 flex items-center gap-4">
-                    <div className="flex aspect-square h-24 w-24 items-center justify-center rounded-lg bg-muted">
-                      {getIconData(iconName) ? (
-                        <Icon icon={iconName} className="h-16 w-16" />
-                      ) : (
-                        <p className="text-xs text-muted-foreground">No Icon</p>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Selected: <br/><span className="font-semibold break-all">{iconName}</span>
-                    </p>
-                </div>
-              </div>
+        <div className="grid gap-6 py-4">
+          {/* Input for the preset name */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-right">
+              Name
+            </Label>
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="col-span-3"
+            />
           </div>
-          
-          {/* Column 2: Icon Selection */}
-          <div className="space-y-2">
-            <Label>Icon</Label>
-             <div className="relative">
-                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                 <Input 
-                    placeholder="Search all icons..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9"
-                 />
-              </div>
-            <ScrollArea className="h-72 w-full rounded-md border p-2">
-              <TooltipProvider>
-                {filteredGameIconCategories.map(category => (
-                    <Collapsible defaultOpen={!!searchTerm} key={category.name} className="mb-2">
-                        <CollapsibleTrigger className={cn("w-full text-left font-semibold text-sm text-muted-foreground mb-2", !searchTerm && "cursor-default")}>
-                            {category.name}
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                            <div className="grid grid-cols-6 gap-1">
-                                {category.icons.map(icon => {
-                                   const iconData = getIconData(icon.fullName);
-                                   if (!iconData) return null;
-
-                                   return(
-                                    <Tooltip key={icon.fullName}>
-                                        <TooltipTrigger asChild>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className={cn(
-                                            'h-12 w-12',
-                                            iconName === icon.fullName && 'bg-accent text-accent-foreground'
-                                            )}
-                                            onClick={() => setIconName(icon.fullName)}
-                                        >
-                                            <Icon icon={iconData} className="h-6 w-6" />
-                                        </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                        <p>{icon.name}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                   );
-                                })}
-                            </div>
-                        </CollapsibleContent>
-                    </Collapsible>
-                ))}
-              </TooltipProvider>
-            </ScrollArea>
+          {/* Icon Picker Button and Preview */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right">Icon</Label>
+            <div className="col-span-3 flex items-center gap-2">
+                <div className="w-10 h-10 border rounded-md flex items-center justify-center bg-gray-100">
+                  <Icon name={iconName} size={24} />
+                </div>
+                <Button variant="outline" onClick={() => setIconPickerOpen(true)}>
+                  Choose Icon
+                </Button>
+            </div>
           </div>
         </div>
         <DialogFooter>
@@ -192,6 +110,11 @@ export function IconEditDialog({ token, isCreating, onUpdate, onCreate, onClose 
           </Button>
         </DialogFooter>
       </DialogContent>
+      <IconPickerDialog
+        open={isIconPickerOpen}
+        onOpenChange={setIconPickerOpen}
+        onSelectIcon={setIconName}
+      />
     </Dialog>
   );
 }

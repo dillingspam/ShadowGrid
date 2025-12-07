@@ -1,6 +1,6 @@
 /**
  * @file This file defines a dialog component for creating and editing token categories.
- * It allows the user to change a category's name and select a new icon.
+ * It allows the user to change a category's name.
  */
 
 'use client';
@@ -15,17 +15,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Save, PlusCircle, FolderPlus } from 'lucide-react';
+import { Save, PlusCircle } from 'lucide-react';
 import type { TokenCategory } from './icon-library';
-import { iconMap } from './token';
-import { ScrollArea } from '../ui/scroll-area';
-import { cn } from '@/lib/utils';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '../ui/tooltip';
 
 /**
  * Props for the CategoryEditDialog component.
@@ -36,17 +27,12 @@ interface CategoryEditDialogProps {
   /** True if creating a new category, false if editing an existing one. */
   isCreating: boolean;
   /** Callback function when an existing category is updated. */
-  onUpdate: (updatedCategory: TokenCategory) => void;
+  onUpdate: (updatedCategory: Omit<TokenCategory, 'tokens'>) => void;
   /** Callback function when a new category is created. */
-  onCreate: (newCategory: Omit<TokenCategory, 'id' | 'tokens'>) => void;
+  onCreate: (newCategory: { title: string }) => void;
   /** Callback function to close the dialog. */
   onClose: () => void;
 }
-
-// Get the list of available icons from the iconMap, excluding the default icon.
-const availableIcons = Object.keys(iconMap).filter(
-  (key) => key !== 'default'
-);
 
 /**
  * A dialog for creating or editing a token category's properties.
@@ -56,13 +42,11 @@ const availableIcons = Object.keys(iconMap).filter(
  */
 export function CategoryEditDialog({ category, isCreating, onUpdate, onCreate, onClose }: CategoryEditDialogProps) {
   const [title, setTitle] = useState('');
-  const [iconName, setIconName] = useState('');
 
   // Effect to populate the dialog's state when the category prop changes.
   useEffect(() => {
     if (category) {
       setTitle(isCreating ? 'New Category' : category.title);
-      setIconName(isCreating ? 'FolderPlus' : category.iconName);
     }
   }, [category, isCreating]);
 
@@ -73,12 +57,9 @@ export function CategoryEditDialog({ category, isCreating, onUpdate, onCreate, o
   // Handles the save action for both creating and updating.
   const handleSave = () => {
     if (isCreating) {
-      onCreate({ title, iconName });
+      onCreate({ title });
     } else {
-      // For updates, we need to merge the changes with the existing category data.
-      // This implementation detail is due to the dialog only managing a subset of category properties.
-      const updatedCategory = { ...(category as TokenCategory), title, iconName };
-      onUpdate(updatedCategory);
+      onUpdate({ id: category.id, title });
     }
     onClose();
   };
@@ -104,44 +85,6 @@ export function CategoryEditDialog({ category, isCreating, onUpdate, onCreate, o
               onChange={(e) => setTitle(e.target.value)}
               className="col-span-3"
             />
-          </div>
-          {/* Scrollable grid for selecting an icon */}
-          <div className="grid grid-cols-4 items-start gap-4">
-            <Label className="text-right pt-2">Icon</Label>
-            <div className="col-span-3">
-              <ScrollArea className="h-32 w-full rounded-md border p-2">
-                <TooltipProvider>
-                  <div className="grid grid-cols-5 gap-2">
-                    {availableIcons.map((key) => {
-                      const IconComponent = iconMap[key];
-                      return (
-                        <Tooltip key={key}>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className={cn(
-                                'h-12 w-12',
-                                iconName === key && 'bg-accent text-accent-foreground'
-                              )}
-                              onClick={() => setIconName(key)}
-                            >
-                              <IconComponent className="h-6 w-6" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{key}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      );
-                    })}
-                  </div>
-                </TooltipProvider>
-              </ScrollArea>
-               <p className="text-xs text-muted-foreground mt-2">
-                Selected Icon: <span className="font-semibold">{iconName}</span>
-              </p>
-            </div>
           </div>
         </div>
         <DialogFooter>

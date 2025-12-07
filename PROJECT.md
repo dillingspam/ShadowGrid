@@ -9,7 +9,7 @@ ShadowGrid is a web-based, tactical command center for tabletop role-playing gam
 ### For Game Masters (GMs)
 
 - **Map Management**: Import custom map images to serve as the battlefield backdrop.
-- **Token Library**: A fully customizable library for creating, editing, and deleting token presets for players, NPCs, monsters, and items.
+- **Token Library**: A streamlined, customizable library for managing token presets. Recent updates have simplified the interface by removing category icons and focusing on a clean, text-based list. Categories are now collapsed by default for a more organized view, and a dynamic scrollbar ensures all content is accessible, even with many expanded categories. GMs can still create, edit, and delete both categories and the tokens within them.
 - **Dynamic Token Placement**: Drag-and-drop tokens from the library onto the grid. Edit token properties like name, color, and size on the fly.
 - **Fog of War**: Dynamically reveal or hide areas of the map using a brush tool to maintain suspense and control player visibility.
 - **Grid System**: A clear grid overlay to facilitate measurement and tactical movement.
