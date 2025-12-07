@@ -325,14 +325,8 @@ export const MapGrid: FC<MapGridProps> = ({
           !isPlayerView && !isFogBrushActive && "cursor-grab",
         )}
       >
-        {/* Layer 1: Static Grid Lines. This is outside the transform container so it doesn't zoom. */}
-        <div 
-          className="absolute inset-0 grid-bg z-[1] pointer-events-none"
-          style={{
-            backgroundSize: `${GRID_CELL_SIZE * scale}px ${GRID_CELL_SIZE * scale}px`,
-            backgroundPosition: `${viewPosition.x}px ${viewPosition.y}px`,
-          }}
-        />
+        {/* Layer 1: Static Grid Lines. This is always visible and doesn't transform. */}
+        <div className="absolute inset-0 grid-bg z-[1] pointer-events-none" />
 
         <div 
             ref={transformContainerRef}
