@@ -5,7 +5,7 @@
  */
 
 'use client';
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Tooltip,
@@ -19,7 +19,6 @@ import {
   MoreVertical,
   PlusCircle,
   FolderPlus,
-  Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { IconEditDialog } from './icon-edit-dialog';
@@ -31,11 +30,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { CategoryEditDialog } from './category-edit-dialog';
-import { Separator } from '../ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
-import { getIconData, gameIconCategories } from '@/lib/game-icons';
+import { getIconData } from '@/lib/game-icons';
 import { Icon } from '@iconify/react';
-import { Input } from '../ui/input';
+
 
 /**
  * Interface for a single token template/preset in the library.
@@ -276,18 +274,6 @@ export function IconLibrary() {
   const [categories, setCategories] = useState<TokenCategory[]>(initialCategories);
   const [editingCategory, setEditingCategory] = useState<Omit<TokenCategory, 'tokens'> | null>(null);
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('presets');
-
-  const filteredGameIconCategories = useMemo(() => {
-    if (!searchTerm) {
-      return gameIconCategories;
-    }
-    return gameIconCategories.map(category => {
-      const filteredIcons = category.icons.filter(icon => icon.name.includes(searchTerm.toLowerCase()));
-      return { ...category, icons: filteredIcons };
-    }).filter(category => category.icons.length > 0);
-  }, [searchTerm]);
 
   // Handler to update a specific token preset within a category.
   const handleTokenUpdate = (categoryId: string, updatedToken: TemplateToken) => {
@@ -348,40 +334,6 @@ export function IconLibrary() {
     setCategories((prev) => prev.filter((c) => c.id !== categoryId));
   };
   
-  const DraggableGameIcon = ({ iconName }: { iconName: string }) => {
-    const onDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-      const dragData = {
-        type: 'new-token',
-        tokenType: 'item', // Default type, can be changed later
-        icon: iconName,
-        name: iconName.split(':')[1].replace(/-/g, ' '),
-      };
-      e.dataTransfer.setData('application/json', JSON.stringify(dragData));
-      e.dataTransfer.effectAllowed = 'copy';
-    };
-  
-    const iconData = getIconData(iconName);
-  
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div
-            draggable
-            onDragStart={onDragStart}
-            className="flex aspect-square items-center justify-center rounded-lg bg-background hover:bg-secondary cursor-grab active:cursor-grabbing transition-all text-muted-foreground hover:text-accent hover:drop-shadow-[0_0_5px_hsl(var(--accent))]"
-          >
-            {iconData ? (
-               <Icon icon={iconData} className="w-3/4 h-3/4" />
-            ) : null}
-          </div>
-        </TooltipTrigger>
-        <TooltipContent side="top">
-          <p>Drag to add {iconName.split(':')[1]}</p>
-        </TooltipContent>
-      </Tooltip>
-    );
-  };
-
   return (
     <TooltipProvider delayDuration={100}>
       <div className="p-4 flex flex-col h-full">
@@ -393,78 +345,42 @@ export function IconLibrary() {
             Token Library
           </h3>
         </div>
-
-        <div className='flex gap-2 mb-2'>
-            <Button variant={activeTab === 'presets' ? 'secondary' : 'ghost'} onClick={() => setActiveTab('presets')} className="flex-1">Presets</Button>
-            <Button variant={activeTab === 'all' ? 'secondary' : 'ghost'} onClick={() => setActiveTab('all')} className="flex-1">All Icons</Button>
-        </div>
-
-
-        {activeTab === 'presets' ? (
-          <>
-            <ScrollArea className="flex-grow -mr-4 pr-4">
-              <div className="space-y-2">
-                {categories.map((category) => (
-                  <IconCategory
-                    key={category.id}
-                    category={category}
-                    onTokenUpdate={handleTokenUpdate}
-                    onTokenDelete={handleTokenDelete}
-                    onTokenAdd={handleTokenAdd}
-                    onCategoryUpdate={(cat) => {
-                      setEditingCategory(cat);
-                      setIsCreatingCategory(false);
-                    }}
-                    onCategoryDelete={handleCategoryDelete}
-                  />
-                ))}
-              </div>
-            </ScrollArea>
-             <div className="pt-4 mt-auto border-t">
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => {
-                  setIsCreatingCategory(true);
-                  setEditingCategory({
-                    id: '',
-                    title: 'New Category',
-                    iconName: 'FolderPlus',
-                  });
+        
+        <ScrollArea className="flex-grow -mr-4 pr-4">
+          <div className="space-y-2">
+            {categories.map((category) => (
+              <IconCategory
+                key={category.id}
+                category={category}
+                onTokenUpdate={handleTokenUpdate}
+                onTokenDelete={handleTokenDelete}
+                onTokenAdd={handleTokenAdd}
+                onCategoryUpdate={(cat) => {
+                  setEditingCategory(cat);
+                  setIsCreatingCategory(false);
                 }}
-              >
-                <FolderPlus className="mr-2 h-4 w-4" />
-                Add Category
-              </Button>
-            </div>
-          </>
-        ) : (
-          <div className="flex flex-col flex-grow min-h-0">
-             <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search all icons..."
-                className="pl-9"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onCategoryDelete={handleCategoryDelete}
               />
-            </div>
-            <ScrollArea className="flex-grow -mr-4 pr-4">
-                {filteredGameIconCategories.map(category => (
-                    <Collapsible defaultOpen key={category.name} className="mb-2">
-                        <CollapsibleTrigger className="w-full text-left font-semibold text-sm text-muted-foreground mb-2">{category.name}</CollapsibleTrigger>
-                        <CollapsibleContent>
-                            <div className="grid grid-cols-4 gap-4">
-                                {category.icons.map(icon => (
-                                    <DraggableGameIcon key={icon.fullName} iconName={icon.fullName} />
-                                ))}
-                            </div>
-                        </CollapsibleContent>
-                    </Collapsible>
-                ))}
-            </ScrollArea>
+            ))}
           </div>
-        )}
+        </ScrollArea>
+        <div className="pt-4 mt-auto border-t">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => {
+              setIsCreatingCategory(true);
+              setEditingCategory({
+                id: '',
+                title: 'New Category',
+                iconName: 'FolderPlus',
+              });
+            }}
+          >
+            <FolderPlus className="mr-2 h-4 w-4" />
+            Add Category
+          </Button>
+        </div>
       </div>
 
       {/* Dialog for editing or creating a category */}
