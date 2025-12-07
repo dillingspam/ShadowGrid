@@ -1,0 +1,88 @@
+{
+  "categories": [
+    {
+      "name": "Creatures & Monsters",
+      "folder": "creatures",
+      "icons": [
+        "dragon.svg",
+        "goblin.svg",
+        "ogre.svg",
+        "skeleton.svg",
+        "wolf.svg",
+        "spider.svg",
+        "bat.svg"
+      ]
+    },
+    {
+      "name": "Weapons",
+      "folder": "weapons",
+      "icons": [
+        "sword.svg",
+        "axe.svg",
+        "bow-arrow.svg",
+        "dagger.svg",
+        "mace.svg",
+        "spear.svg",
+        "staff.svg"
+      ]
+    },
+    {
+      "name": "Armor & Equipment",
+      "folder": "equipment",
+      "icons": [
+        "helmet.svg",
+        "shield.svg",
+        "chest-armor.svg",
+        "gauntlet.svg",
+        "boots.svg",
+        "backpack.svg"
+      ]
+    },
+    {
+      "name": "Magic & Spells",
+      "folder": "magic",
+      "icons": [
+        "spell-book.svg",
+        "magic-swirl.svg",
+        "fireball.svg",
+        "ice-crystal.svg",
+        "potion.svg",
+        "rune.svg"
+      ]
+    },
+    {
+      "name": "Items & Loot",
+      "folder": "items",
+      "icons": [
+        "chest.svg",
+        "gold-coins.svg",
+        "gem.svg",
+        "key.svg",
+        "scroll.svg",
+        "ring.svg"
+      ]
+    },
+    {
+      "name": "Scenery & Objects",
+      "folder": "scenery",
+      "icons": [
+        "door.svg",
+        "trap.svg",
+        "torch.svg",
+        "campfire.svg",
+        "rock.svg",
+        "tree.svg"
+      ]
+    },
+    {
+      "name": "UI & Status",
+      "folder": "ui",
+      "icons": [
+        "target.svg",
+        "arrow-up.svg",
+        "talk-bubble.svg",
+        "death-skull.svg"
+      ]
+    }
+  ]
+}
