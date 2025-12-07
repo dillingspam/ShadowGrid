@@ -357,13 +357,6 @@ export const MapGrid: FC<MapGridProps> = ({
           height: '100%',
         }}
       >
-        {/* Layer 1: Static Grid Lines. This is always visible and doesn't transform. */}
-        {isGridVisible && (
-            <div 
-                className="absolute inset-0 grid-bg z-[4] pointer-events-none"
-            />
-        )}
-
         {/* This container holds all transformable elements (map, tokens) */}
         <div 
             ref={transformContainerRef}
@@ -375,7 +368,7 @@ export const MapGrid: FC<MapGridProps> = ({
                 transformOrigin: '0 0',
             }}
         >
-            {/* Layer 2: Map Image */}
+            {/* Layer 1: Map Image */}
             <div className="absolute inset-0 z-[1] pointer-events-none">
             {mapImage && (
                 <Image 
@@ -387,6 +380,13 @@ export const MapGrid: FC<MapGridProps> = ({
             )}
             </div>
 
+            {/* Layer 2: Grid Lines. This is inside the transform container so it scales. */}
+            {isGridVisible && (
+                <div 
+                    className="absolute inset-0 grid-bg z-[2] pointer-events-none"
+                />
+            )}
+
             {/* Layer 3: Tokens */}
             <div className="relative w-full h-full z-[3]">
             {visibleTokens.map(token => (
@@ -394,7 +394,7 @@ export const MapGrid: FC<MapGridProps> = ({
             ))}
             </div>
             
-            {/* Layer 5: Fog of War */}
+            {/* Layer 4: Fog of War */}
             <FogOfWar fog={fog} isPlayerView={isPlayerView} fogOpacity={fogOpacity!} />
         </div>
 
