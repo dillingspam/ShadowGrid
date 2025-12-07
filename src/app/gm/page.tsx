@@ -33,7 +33,7 @@ export default function GMPage() {
       <Header title="GM Screen" />
       {/* Main layout grid: map on the left, controls on the right (on medium screens and up) */}
       <div className="grid md:grid-cols-[1fr_350px] flex-1 overflow-hidden">
-        <main className="p-4 overflow-auto flex items-center justify-center">
+        <main className="overflow-auto p-4">
           {/* The main map grid where tokens and fog are displayed */}
           <MapGrid 
             fogOpacity={fogOpacity} 

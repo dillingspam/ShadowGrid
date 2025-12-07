@@ -16,7 +16,7 @@ export default function PlayerPage() {
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
       <Header title="Player View" />
-      <main className="flex-1 flex items-center justify-center p-4 overflow-hidden">
+      <main className="flex-1 overflow-auto p-4">
         {/* 
           The MapGrid component is reused here, but with `isPlayerView` set to true.
           This tells the component to hide certain elements and behaviors, like token editing
