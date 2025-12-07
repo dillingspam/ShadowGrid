@@ -27,6 +27,8 @@ export default function GMPage() {
   const [brushSize, setBrushSize] = useState(3);
   // State to hold the data URL of the uploaded map image.
   const [mapImage, setMapImage] = useState<string | null>(null);
+  // State to hold the dimensions of the uploaded map image.
+  const [mapDimensions, setMapDimensions] = useState<{ width: number, height: number } | null>(null);
   
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
@@ -40,6 +42,7 @@ export default function GMPage() {
             isFogBrushActive={isFogBrushActive} 
             brushSize={brushSize}
             mapImage={mapImage}
+            mapDimensions={mapDimensions}
           />
         </main>
         {/* Sidebar for GM controls and token library */}
@@ -54,7 +57,10 @@ export default function GMPage() {
               onFogBrushToggle={setIsFogBrushActive}
               brushSize={brushSize}
               onBrushSizeChange={setBrushSize}
-              onMapImageChange={setMapImage}
+              onMapChange={(url, dimensions) => {
+                setMapImage(url);
+                setMapDimensions(dimensions);
+              }}
             />
           </div>
         </aside>

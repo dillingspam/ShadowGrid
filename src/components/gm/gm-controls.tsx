@@ -35,8 +35,8 @@ interface GmControlsProps {
   brushSize: number;
   /** Callback to update the brush size. */
   onBrushSizeChange: (value: number) => void;
-  /** Callback to update the map image with a new data URL. */
-  onMapImageChange: (url: string | null) => void;
+  /** Callback to update the map image and its dimensions. */
+  onMapChange: (url: string | null, dimensions: { width: number; height: number } | null) => void;
 }
 
 /**
@@ -53,7 +53,7 @@ export function GmControls({
   onFogBrushToggle,
   brushSize,
   onBrushSizeChange,
-  onMapImageChange
+  onMapChange
 }: GmControlsProps) {
   // Ref to the hidden file input element for importing map images.
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -64,8 +64,13 @@ export function GmControls({
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        // Once the file is read, its data URL is passed up to the parent.
-        onMapImageChange(e.target?.result as string);
+        const imageUrl = e.target?.result as string;
+        const img = new window.Image();
+        img.onload = () => {
+          // Once the image is loaded, pass its URL and dimensions up to the parent.
+          onMapChange(imageUrl, { width: img.naturalWidth, height: img.naturalHeight });
+        };
+        img.src = imageUrl;
       };
       reader.readAsDataURL(file);
     }
@@ -78,7 +83,7 @@ export function GmControls({
 
   // Clears the current map image and resets the file input.
   const handleClearMap = () => {
-    onMapImageChange(null);
+    onMapChange(null, null);
     if(fileInputRef.current) {
         fileInputRef.current.value = '';
     }

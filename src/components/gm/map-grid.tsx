@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useState, useRef, DragEvent, MouseEvent, FC, useMemo, WheelEvent } from 'react';
+import { useState, useRef, DragEvent, MouseEvent, FC, useMemo, WheelEvent, useEffect } from 'react';
 import { Token, GRID_CELL_SIZE } from './token';
 import type { TokenData } from './token';
 import { cn } from '@/lib/utils';
@@ -24,9 +24,11 @@ const initialTokens: TokenData[] = [
   { id: 'item1', x: 15, y: 12, color: 'hsl(var(--primary))', icon: 'Gem', size: 1, name: 'Data-Spike' },
 ];
 
-// Constants for the grid dimensions.
-const GRID_WIDTH = 48;
-const GRID_HEIGHT = 27;
+// Constants for the default grid dimensions if no map is loaded.
+const DEFAULT_GRID_WIDTH = 48;
+const DEFAULT_GRID_HEIGHT = 27;
+
+// Constants for zoom limits.
 const MIN_SCALE = 0.2;
 const MAX_SCALE = 3;
 
@@ -44,6 +46,8 @@ interface MapGridProps {
   brushSize?: number;
   /** The data URL of the background map image. */
   mapImage?: string | null;
+  /** The dimensions of the background map image. */
+  mapDimensions?: { width: number; height: number } | null;
 }
 
 /**
@@ -57,10 +61,18 @@ export const MapGrid: FC<MapGridProps> = ({
   fogOpacity = 80, 
   isFogBrushActive = false,
   brushSize = 3,
-  mapImage = null
+  mapImage = null,
+  mapDimensions = null
 }) => {
   const [tokens, setTokens] = useState(initialTokens);
-  const [fog, setFog] = useState(() => generateInitialFog(GRID_WIDTH, GRID_HEIGHT, isPlayerView));
+  
+  // Calculate grid dimensions based on map image or use defaults.
+  const gridWidth = mapDimensions ? Math.ceil(mapDimensions.width / GRID_CELL_SIZE) : DEFAULT_GRID_WIDTH;
+  const gridHeight = mapDimensions ? Math.ceil(mapDimensions.height / GRID_CELL_SIZE) : DEFAULT_GRID_HEIGHT;
+  const containerWidth = gridWidth * GRID_CELL_SIZE;
+  const containerHeight = gridHeight * GRID_CELL_SIZE;
+  
+  const [fog, setFog] = useState(() => generateInitialFog(gridWidth, gridHeight, isPlayerView));
   const [editingToken, setEditingToken] = useState<TokenData | null>(null);
   
   // State for panning and zooming
@@ -72,6 +84,11 @@ export const MapGrid: FC<MapGridProps> = ({
   const gridRef = useRef<HTMLDivElement>(null);
   const transformContainerRef = useRef<HTMLDivElement>(null);
   const fogInteractionState = useRef<'revealing' | 'hiding' | null>(null);
+
+  // Effect to re-initialize fog when the grid dimensions change.
+  useEffect(() => {
+    setFog(generateInitialFog(gridWidth, gridHeight, isPlayerView));
+  }, [gridWidth, gridHeight, isPlayerView]);
 
   // Memoize visible tokens to prevent re-calculation unless dependencies change.
   // In player view, it filters out tokens that are under the fog.
@@ -135,8 +152,12 @@ export const MapGrid: FC<MapGridProps> = ({
       dropY -= offset;
     }
 
-    const newX = Math.floor(dropX / (GRID_CELL_SIZE * scale));
-    const newY = Math.floor(dropY / (GRID_CELL_SIZE * scale));
+    let newX = Math.floor(dropX / (GRID_CELL_SIZE * scale));
+    let newY = Math.floor(dropY / (GRID_CELL_SIZE * scale));
+
+    // Clamp coordinates to be within the grid bounds.
+    newX = Math.max(0, Math.min(newX, gridWidth - (token?.size || 1)));
+    newY = Math.max(0, Math.min(newY, gridHeight - (token?.size || 1)));
     
     // Handle drop for new tokens from the library.
     const newTokeDataString = e.dataTransfer.getData("application/json");
@@ -320,10 +341,17 @@ export const MapGrid: FC<MapGridProps> = ({
         onContextMenu={onGridContextMenu}
         onWheel={handleWheel}
         className={cn(
-          "relative aspect-video w-full bg-card border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10",
+          "relative bg-card border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10",
           !isPlayerView && isFogBrushActive && "cursor-crosshair",
           !isPlayerView && !isFogBrushActive && "cursor-grab",
         )}
+        style={{
+          width: mapDimensions ? 'auto' : `${containerWidth}px`,
+          height: mapDimensions ? 'auto' : `${containerHeight}px`,
+          aspectRatio: mapDimensions ? `${mapDimensions.width} / ${mapDimensions.height}` : 'auto',
+          maxWidth: '100%',
+          maxHeight: '100%',
+        }}
       >
         {/* Layer 1: Static Grid Lines. This is always visible and doesn't transform. */}
         <div 
@@ -336,10 +364,10 @@ export const MapGrid: FC<MapGridProps> = ({
 
         <div 
             ref={transformContainerRef}
-            className="w-full h-full"
+            className="absolute inset-0"
             style={{
-                width: `${GRID_WIDTH * GRID_CELL_SIZE}px`,
-                height: `${GRID_HEIGHT * GRID_CELL_SIZE}px`,
+                width: `${containerWidth}px`,
+                height: `${containerHeight}px`,
                 transform: `translate(${viewPosition.x}px, ${viewPosition.y}px) scale(${scale})`,
                 transformOrigin: '0 0',
             }}
@@ -372,7 +400,7 @@ export const MapGrid: FC<MapGridProps> = ({
         {!isPlayerView && (
             <>
                 <div className="absolute top-2 left-2 bg-background/80 px-2 py-1 rounded-md text-xs text-muted-foreground z-10">
-                    Grid: {GRID_WIDTH}x{GRID_HEIGHT} | Tokens: {tokens.length}
+                    Grid: {gridWidth}x{gridHeight} | Tokens: {tokens.length}
                 </div>
                 <MapControls scale={scale} setScale={setScale} resetView={resetView} />
             </>
