@@ -323,6 +323,9 @@ export const MapGrid: FC<MapGridProps> = ({
           height: `${GRID_HEIGHT * GRID_CELL_SIZE}px`,
         }}
       >
+        {/* Layer 1: Grid Lines (Static) */}
+        <div className="absolute inset-0 grid-bg z-[1] pointer-events-none" />
+
         <div 
             ref={transformContainerRef}
             className="w-full h-full"
@@ -331,8 +334,8 @@ export const MapGrid: FC<MapGridProps> = ({
                 transformOrigin: '0 0',
             }}
         >
-            {/* Layer 1: Map Image */}
-            <div className="absolute inset-0 z-[1] pointer-events-none">
+            {/* Layer 2: Map Image */}
+            <div className="absolute inset-0 z-[2] pointer-events-none">
             {mapImage && (
                 <Image 
                 src={mapImage}
@@ -342,9 +345,7 @@ export const MapGrid: FC<MapGridProps> = ({
                 />
             )}
             </div>
-            {/* Layer 2: Grid Lines */}
-            <div className="absolute inset-0 grid-bg z-[2] pointer-events-none" />
-            
+
             {/* Layer 3: Tokens */}
             <div className="relative w-full h-full z-[3]">
             {visibleTokens.map(token => (
