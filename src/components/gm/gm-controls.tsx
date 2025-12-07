@@ -10,8 +10,14 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { Dices, ShieldQuestion, Brush, Map, Trash2 } from 'lucide-react';
+import { Dices, ShieldQuestion, Brush, Map, Trash2, MousePointerClick } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 /**
  * Props for the GmControls component.
@@ -90,6 +96,33 @@ export function GmControls({
         
         {/* Environment Tab Content */}
         <TabsContent value="environment" className="mt-6 space-y-6">
+           <div className="space-y-2 rounded-lg border p-3">
+              <TooltipProvider>
+                <p className="text-xs text-muted-foreground font-semibold">CONTROLS</p>
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div className='flex items-center text-xs text-muted-foreground gap-2'>
+                           <MousePointerClick className='w-4 h-4'/> 
+                           <span>Middle-click + Drag to Pan</span>
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Hold the middle mouse button (scroll wheel) and drag to move around the map.</p>
+                    </TooltipContent>
+                </Tooltip>
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div className='flex items-center text-xs text-muted-foreground gap-2'>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2v0z"/><path d="M12 18a6 6 0 1 0 0-12v12z"/><path d="M12 2a10 10 0 0 0-4 1.27"/></svg>
+                            <span>Scroll to Zoom</span>
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Use your mouse wheel to zoom in and out.</p>
+                    </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+           </div>
            <Button 
             variant={isFogBrushActive ? "secondary" : "outline"}
             className={cn("w-full transition-all", isFogBrushActive && "shadow-inner shadow-accent/50 border-accent text-accent")}

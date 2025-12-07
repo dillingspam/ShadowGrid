@@ -2,7 +2,7 @@
  * @file This file defines the main page for the Player View.
  * It displays the map grid from a player's perspective, respecting fog of war.
  */
-
+'use client';
 import { MapGrid } from '@/components/gm/map-grid';
 import { Header } from '@/components/shared/header';
 

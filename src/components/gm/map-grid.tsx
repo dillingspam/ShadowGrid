@@ -6,13 +6,14 @@
 
 'use client';
 
-import { useState, useRef, DragEvent, MouseEvent, FC, useMemo } from 'react';
+import { useState, useRef, DragEvent, MouseEvent, FC, useMemo, WheelEvent } from 'react';
 import { Token, GRID_CELL_SIZE } from './token';
 import type { TokenData } from './token';
 import { cn } from '@/lib/utils';
 import { FogOfWar, generateInitialFog } from './fog-of-war';
 import Image from 'next/image';
 import { TokenEditDialog } from './token-edit-dialog';
+import { MapControls } from './map-controls';
 
 // Initial set of tokens for demonstration purposes.
 const initialTokens: TokenData[] = [
@@ -26,6 +27,8 @@ const initialTokens: TokenData[] = [
 // Constants for the grid dimensions.
 const GRID_WIDTH = 40;
 const GRID_HEIGHT = 25;
+const MIN_SCALE = 0.2;
+const MAX_SCALE = 3;
 
 /**
  * Props for the MapGrid component.
@@ -59,7 +62,15 @@ export const MapGrid: FC<MapGridProps> = ({
   const [tokens, setTokens] = useState(initialTokens);
   const [fog, setFog] = useState(() => generateInitialFog(GRID_WIDTH, GRID_HEIGHT, isPlayerView));
   const [editingToken, setEditingToken] = useState<TokenData | null>(null);
+  
+  // State for panning and zooming
+  const [scale, setScale] = useState(1);
+  const [viewPosition, setViewPosition] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+
   const gridRef = useRef<HTMLDivElement>(null);
+  const transformContainerRef = useRef<HTMLDivElement>(null);
   const fogInteractionState = useRef<'revealing' | 'hiding' | null>(null);
 
   // Memoize visible tokens to prevent re-calculation unless dependencies change.
@@ -76,6 +87,21 @@ export const MapGrid: FC<MapGridProps> = ({
   }, [tokens, fog, isPlayerView]);
 
 
+  /**
+   * Converts screen coordinates (e.g., from a mouse event) to grid coordinates,
+   * taking into account the current pan and zoom state.
+   * @param {number} screenX The x-coordinate on the screen.
+   * @param {number} screenY The y-coordinate on the screen.
+   * @returns {{x: number, y: number}} The corresponding grid coordinates.
+   */
+  const screenToGridCoords = (screenX: number, screenY: number) => {
+    if (!gridRef.current) return { x: 0, y: 0 };
+    const gridBounds = gridRef.current.getBoundingClientRect();
+    const gridX = (screenX - gridBounds.left - viewPosition.x) / scale;
+    const gridY = (screenY - gridBounds.top - viewPosition.y) / scale;
+    return { x: gridX, y: gridY };
+  };
+  
   // Handles when an item is dragged over the grid.
   const onDragOver = (e: DragEvent) => {
     e.preventDefault();
@@ -92,14 +118,14 @@ export const MapGrid: FC<MapGridProps> = ({
     e.preventDefault();
     if (isPlayerView || !gridRef.current) return;
 
-    const gridBounds = gridRef.current.getBoundingClientRect();
-    
     const tokenId = e.dataTransfer.getData("application/reactflow"); // For existing tokens
     const token = tokens.find((t) => t.id === tokenId);
     
-    // Calculate drop position relative to the grid.
-    let dropX = e.clientX - gridBounds.left;
-    let dropY = e.clientY - gridBounds.top;
+    // Calculate drop position relative to the grid, accounting for pan/zoom.
+    const { x: gridX, y: gridY } = screenToGridCoords(e.clientX, e.clientY);
+    
+    let dropX = gridX;
+    let dropY = gridY;
 
     // If moving an existing token, offset the drop point by half the token's size
     // to center the token on the cursor.
@@ -145,9 +171,10 @@ export const MapGrid: FC<MapGridProps> = ({
   const handleFogInteraction = (e: MouseEvent<HTMLDivElement>) => {
     if (isPlayerView || !gridRef.current || !fogInteractionState.current) return;
     
-    const gridBounds = gridRef.current.getBoundingClientRect();
-    const centerX = Math.floor((e.clientX - gridBounds.left) / GRID_CELL_SIZE);
-    const centerY = Math.floor((e.clientY - gridBounds.top) / GRID_CELL_SIZE);
+    const { x: gridX, y: gridY } = screenToGridCoords(e.clientX, e.clientY);
+
+    const centerX = Math.floor(gridX / GRID_CELL_SIZE);
+    const centerY = Math.floor(gridY / GRID_CELL_SIZE);
     
     const shouldReveal = fogInteractionState.current === 'revealing';
     const radius = brushSize! - 1;
@@ -190,37 +217,86 @@ export const MapGrid: FC<MapGridProps> = ({
     setEditingToken(token);
   };
 
-  // Sets the fog interaction mode on mouse down.
+  // Sets the interaction mode (panning or fog) on mouse down.
   const onMouseDown = (e: MouseEvent<HTMLDivElement>) => {
-    if (isPlayerView || !isFogBrushActive) return;
-    if (e.button === 0) { // Left click
-      fogInteractionState.current = 'revealing';
-    } else if (e.button === 2) { // Right click
-      e.preventDefault();
-      fogInteractionState.current = 'hiding';
+    if (isPlayerView) return;
+    
+    // Pan with middle mouse button, or with left-click + space
+    if (e.button === 1 || (e.button === 0 && e.nativeEvent.ctrlKey)) {
+        e.preventDefault();
+        setIsPanning(true);
+        setPanStart({ x: e.clientX - viewPosition.x, y: e.clientY - viewPosition.y });
+        (e.target as HTMLElement).style.cursor = 'grabbing';
+        return;
     }
-    handleFogInteraction(e);
+    
+    if (isFogBrushActive) {
+      if (e.button === 0) { // Left click
+        fogInteractionState.current = 'revealing';
+      } else if (e.button === 2) { // Right click
+        e.preventDefault();
+        fogInteractionState.current = 'hiding';
+      }
+      handleFogInteraction(e);
+    }
   };
 
-  // Continues the fog interaction on mouse move.
+  // Continues the interaction on mouse move.
   const onMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+     if (isPanning) {
+        const newX = e.clientX - panStart.x;
+        const newY = e.clientY - panStart.y;
+        setViewPosition({ x: newX, y: newY });
+        return;
+     }
+
     if (!fogInteractionState.current || !isFogBrushActive) return;
     handleFogInteraction(e);
   };
   
-  // Resets the fog interaction mode on mouse up.
-  const onMouseUp = () => {
-    fogInteractionState.current = null;
-  };
-
-  // Also reset on mouse leave to prevent getting "stuck" in a mode.
-  const onMouseLeave = () => {
+  // Resets the interaction mode on mouse up.
+  const onMouseUp = (e: MouseEvent<HTMLDivElement>) => {
+    if (isPanning) {
+        setIsPanning(false);
+        (e.target as HTMLElement).style.cursor = isFogBrushActive ? 'crosshair' : 'default';
+    }
     fogInteractionState.current = null;
   };
   
-  // Prevents the browser's context menu when using the fog brush.
+  // Handles zooming with the mouse wheel.
+  const handleWheel = (e: WheelEvent<HTMLDivElement>) => {
+    if (isPlayerView) return;
+    e.preventDefault();
+
+    const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale - e.deltaY * 0.001));
+
+    const { x: mouseX, y: mouseY } = screenToGridCoords(e.clientX, e.clientY);
+    
+    // Adjust viewPosition so the point under the cursor stays the same
+    const newViewPosX = viewPosition.x - mouseX * (newScale - scale);
+    const newViewPosY = viewPosition.y - mouseY * (newScale - scale);
+
+    setScale(newScale);
+    setViewPosition({ x: newViewPosX, y: newViewPosY });
+  };
+  
+  const resetView = () => {
+    setScale(1);
+    setViewPosition({ x: 0, y: 0 });
+  }
+
+  // Also reset on mouse leave to prevent getting "stuck" in a mode.
+  const onMouseLeave = (e: MouseEvent<HTMLDivElement>) => {
+    if (isPanning) {
+        setIsPanning(false);
+        (e.target as HTMLElement).style.cursor = isFogBrushActive ? 'crosshair' : 'default';
+    }
+    fogInteractionState.current = null;
+  };
+  
+  // Prevents the browser's context menu when using the fog brush or panning.
   const onGridContextMenu = (e: MouseEvent<HTMLDivElement>) => {
-    if (isFogBrushActive) {
+    if (isFogBrushActive || e.button === 1) {
       e.preventDefault();
     }
   }
@@ -236,9 +312,11 @@ export const MapGrid: FC<MapGridProps> = ({
         onMouseUp={onMouseUp}
         onMouseLeave={onMouseLeave}
         onContextMenu={onGridContextMenu}
+        onWheel={handleWheel}
         className={cn(
           "relative bg-card border border-border rounded-lg overflow-hidden shadow-2xl shadow-primary/10",
-          !isPlayerView && isFogBrushActive && "cursor-crosshair"
+          !isPlayerView && isFogBrushActive && "cursor-crosshair",
+          !isPlayerView && !isFogBrushActive && "cursor-grab",
         )}
         style={{
           width: `${GRID_WIDTH * GRID_CELL_SIZE}px`,
@@ -247,35 +325,48 @@ export const MapGrid: FC<MapGridProps> = ({
           maxHeight: '100%',
         }}
       >
-        {/* Layer 1: Map Image */}
-        <div className="absolute inset-0 z-[1] pointer-events-none">
-          {mapImage && (
-            <Image 
-              src={mapImage}
-              alt="Game Map"
-              fill
-              style={{objectFit: "cover"}}
-            />
-          )}
+        <div 
+            ref={transformContainerRef}
+            className="w-full h-full"
+            style={{
+                transform: `translate(${viewPosition.x}px, ${viewPosition.y}px) scale(${scale})`,
+                transformOrigin: '0 0',
+            }}
+        >
+            {/* Layer 1: Map Image */}
+            <div className="absolute inset-0 z-[1] pointer-events-none">
+            {mapImage && (
+                <Image 
+                src={mapImage}
+                alt="Game Map"
+                fill
+                style={{objectFit: "cover"}}
+                />
+            )}
+            </div>
+            {/* Layer 2: Grid Lines */}
+            <div className="absolute inset-0 grid-bg z-[2] pointer-events-none" />
+            
+            {/* Layer 3: Tokens */}
+            <div className="relative w-full h-full z-[3]">
+            {visibleTokens.map(token => (
+                <Token key={token.id} onContextMenu={handleTokenContextMenu} isPlayerView={isPlayerView} {...token} />
+            ))}
+            </div>
+            
+            {/* Layer 4: Fog of War */}
+            <FogOfWar fog={fog} isPlayerView={isPlayerView} fogOpacity={fogOpacity!} />
         </div>
-        {/* Layer 2: Grid Lines */}
-        <div className="absolute inset-0 grid-bg z-[2] pointer-events-none" />
-        
-        {/* Layer 3: Tokens */}
-        <div className="relative w-full h-full z-[3]">
-          {visibleTokens.map(token => (
-            <Token key={token.id} onContextMenu={handleTokenContextMenu} isPlayerView={isPlayerView} {...token} />
-          ))}
-        </div>
-        
-        {/* Layer 4: Fog of War */}
-        <FogOfWar fog={fog} isPlayerView={isPlayerView} fogOpacity={fogOpacity!} />
+
 
         {/* GM-only overlay with grid info */}
         {!isPlayerView && (
-          <div className="absolute top-2 left-2 bg-background/80 px-2 py-1 rounded-md text-xs text-muted-foreground z-10">
-            Grid: {GRID_WIDTH}x{GRID_HEIGHT} | Tokens: {tokens.length}
-          </div>
+            <>
+                <div className="absolute top-2 left-2 bg-background/80 px-2 py-1 rounded-md text-xs text-muted-foreground z-10">
+                    Grid: {GRID_WIDTH}x{GRID_HEIGHT} | Tokens: {tokens.length}
+                </div>
+                <MapControls scale={scale} setScale={setScale} resetView={resetView} />
+            </>
         )}
       </div>
 
