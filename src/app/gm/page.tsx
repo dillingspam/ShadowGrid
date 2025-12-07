@@ -1,58 +1,62 @@
 /**
- * @file This file defines the main page for the Game Master (GM) screen.
- * It brings together the map grid, the icon library, and the GM controls into a single, cohesive layout.
+ * @file This file defines the Game Master (GM) screen, which is the main interface
+ * for controlling the virtual tabletop. It integrates all the GM-specific components.
  */
 
 'use client';
+
 import { useState } from 'react';
+import { Header } from '@/components/shared/header';
+import { MapGrid } from '@/components/gm/map-grid';
 import { GmControls } from '@/components/gm/gm-controls';
 import { IconLibrary } from '@/components/gm/icon-library';
-import { MapGrid } from '@/components/gm/map-grid';
-import { Header } from '@/components/shared/header';
-import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable"
 
 /**
- * The main component for the GM screen.
- * It manages the state for fog of war opacity, brush settings, and the currently loaded map image.
- * This state is passed down to the relevant child components.
+ * The main component for the Game Master screen.
+ * It lays out the interface with a map grid, GM controls, and a token library.
  *
- * @returns {JSX.Element} The rendered GM screen page.
+ * @returns {JSX.Element} The rendered GM screen.
  */
-export default function GMPage() {
-  // State for controlling the opacity of the GM's view of the fog of war.
+export default function GmScreen() {
+  // State for managing the fog of war controls
   const [fogOpacity, setFogOpacity] = useState(80);
-  // State to toggle the fog of war brush on and off.
   const [isFogBrushActive, setIsFogBrushActive] = useState(false);
-  // State for the size of the fog of war brush.
   const [brushSize, setBrushSize] = useState(3);
-  // State to hold the data URL of the uploaded map image.
+  
+  // State for the map background
   const [mapImage, setMapImage] = useState<string | null>(null);
-  // State to hold the dimensions of the uploaded map image.
   const [mapDimensions, setMapDimensions] = useState<{ width: number, height: number } | null>(null);
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground">
-      <Header title="GM Screen" />
-      {/* Main layout grid: map on the left, controls on the right */}
-      <div className="grid md:grid-cols-[1fr_350px] flex-1 overflow-hidden">
-        <main className="flex items-center justify-center overflow-auto p-4 relative">
-          {/* The main map grid where tokens and fog are displayed */}
-          <MapGrid 
-            fogOpacity={fogOpacity} 
-            isFogBrushActive={isFogBrushActive} 
+      <Header />
+      <ResizablePanelGroup direction="horizontal" className="flex-grow">
+        
+        {/* Main Content: Map Grid */}
+        <ResizablePanel defaultSize={75} className="flex-grow flex items-center justify-center p-4">
+           <MapGrid 
+            fogOpacity={fogOpacity}
+            isFogBrushActive={isFogBrushActive}
             brushSize={brushSize}
             mapImage={mapImage}
             mapDimensions={mapDimensions}
           />
-        </main>
-        {/* Sidebar for GM controls and token library */}
-        <aside className="hidden md:flex flex-col bg-card border-l border-border">
-          <IconLibrary />
-          <Separator />
-          <ScrollArea className="flex-1">
-            <GmControls 
-              fogOpacity={fogOpacity} 
+        </ResizablePanel>
+
+        <ResizableHandle withHandle />
+
+        {/* Right Sidebar */}
+        <ResizablePanel defaultSize={25} maxSize={40} minSize={20} className="w-[380px] flex flex-col border-l bg-card">
+           {/* Top part of sidebar: GM Controls */}
+           <ScrollArea className="flex-grow">
+             <GmControls 
+              fogOpacity={fogOpacity}
               onFogOpacityChange={setFogOpacity}
               isFogBrushActive={isFogBrushActive}
               onFogBrushToggle={setIsFogBrushActive}
@@ -63,9 +67,15 @@ export default function GMPage() {
                 setMapDimensions(dimensions);
               }}
             />
-          </ScrollArea>
-        </aside>
-      </div>
+           </ScrollArea>
+           
+           {/* Bottom part of sidebar: Token Library */}
+           <div className="border-t">
+            <IconLibrary />
+           </div>
+        </ResizablePanel>
+
+      </ResizablePanelGroup>
     </div>
   );
 }
